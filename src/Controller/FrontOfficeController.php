@@ -14,4 +14,45 @@ final class FrontOfficeController extends AbstractController{
             'controller_name' => 'FrontOfficeController',
         ]);
     }
+
+    #[Route('/about', name: 'app_front_office_about')]
+    public function about(): Response
+    {
+        return $this->render('front_office/about.html.twig', [
+            'controller_name' => 'FrontOfficeController',
+        ]);
+    }
+
+    #[Route('/contact', name: 'app_front_office_contact')]
+    public function contact(): Response
+    {
+        return $this->render('front_office/contact.html.twig', [
+            'controller_name' => 'FrontOfficeController',
+        ]);
+    }
+
+    #[Route('/services', name: 'app_front_office_services')]
+    public function services(): Response
+    {
+        return $this->render('front_office/services.html.twig', [
+            'controller_name' => 'FrontOfficeController',
+        ]);
+    }
+
+    #[Route('/pricing', name: 'app_front_office_package')]
+    public function pricing(): Response
+    {
+        return $this->render('front_office/package.html.twig', [
+            'controller_name' => 'FrontOfficeController',
+        ]);
+    }
+
+    #[Route('/blog', name: 'app_front_office_blog')]
+    public function blog(): Response
+    {
+        return $this->render('front_office/blog.html.twig', [
+            'controller_name' => 'FrontOfficeController',
+        ]);
+    }
+    
 }
