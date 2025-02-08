@@ -77,8 +77,22 @@
                         <a href="{{ path('app_front_office') }}" class="nav-item nav-link {% if app.request.attributes.get('_route') == 'app_front_office' %}active{% endif %}" >Home</a>
                         <a href="{{ path('app_front_office_about') }}" class="nav-item nav-link {% if app.request.attributes.get('_route') == 'app_front_office_about' %}active{% endif %}" >About</a>
                         <a href="{{ path('app_front_office_services') }}" class="nav-item nav-link {% if app.request.attributes.get('_route') == 'app_front_office_services' %}active{% endif %}" >Services</a>
-                        <a href="{{ path('app_front_office_package') }}" class="nav-item nav-link {% if app.request.attributes.get('_route') == 'app_front_office_package' %}active{% endif %}" >Packages</a>
+                        <a href="{{ path('app_front_office_packages') }}" class="nav-item nav-link {% if app.request.attributes.get('_route') == 'app_front_office_packages' %}active{% endif %}" >packages</a>
                         <a href="{{ path('app_front_office_blog') }}" class="nav-item nav-link {% if app.request.attributes.get('_route') == 'app_front_office_blog' %}active{% endif %}" >Blog</a>
+                        <div class="nav-item dropdown">
+                        <a href="#" class="nav-link dropdown-toggle show" data-bs-toggle="dropdown" aria-expanded="true">
+                          Pages
+                         </a>
+                         <div class="dropdown-menu m-0 show" data-bs-popper="none">
+                         <a href="destination.html" class="dropdown-item">Destination</a>
+                         <a href="tour.html" class="dropdown-item">Explore Tour</a>
+                          <a href="booking.html" class="dropdown-item">Travel Booking</a>
+                          <a href="gallery.html" class="dropdown-item">Our Gallery</a>
+                          <a href="guides.html" class="dropdown-item">Travel Guides</a>
+                          <a href="testimonial.html" class="dropdown-item">Testimonial</a>
+                         <a href="404.html" class="dropdown-item">404 Page</a>
+                           </div>
+                         </div>
                         <a href="{{ path('app_front_office_contact') }}" class="nav-item nav-link {% if app.request.attributes.get('_route') == 'app_front_office_contact' %}active{% endif %}" >Contact</a>
                         
                     </div>

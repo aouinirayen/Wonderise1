@@ -39,10 +39,10 @@ final class FrontOfficeController extends AbstractController{
         ]);
     }
 
-    #[Route('/pricing', name: 'app_front_office_package')]
-    public function pricing(): Response
+    #[Route('/packages', name: 'app_front_office_packages')]
+    public function packages(): Response
     {
-        return $this->render('front_office/package.html.twig', [
+        return $this->render('front_office/packages.html.twig', [
             'controller_name' => 'FrontOfficeController',
         ]);
     }
@@ -54,5 +54,6 @@ final class FrontOfficeController extends AbstractController{
             'controller_name' => 'FrontOfficeController',
         ]);
     }
+    
     
 }
