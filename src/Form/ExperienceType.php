@@ -3,8 +3,10 @@
 namespace App\Form;
 
 use App\Entity\Experience;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -17,7 +19,7 @@ class ExperienceType extends AbstractType
                 'required' => false,
                 'label' => 'Title',
                 'attr' => ['class' => 'form-control']
-            ] )
+            ])
             ->add('description', TextType::class, [
                 'required' => false,
                 'label' => 'Description',
@@ -43,15 +45,16 @@ class ExperienceType extends AbstractType
                 'label' => 'Id ',
                 'attr' => ['class' => 'form-control']
             ])
-            ->add('rating', TextType::class, [
-                'required' => false,
-                'label' => 'Description',
+            ->add('date', DateType::class, [
+                'widget' => 'single_text',
+                'required' => true,
+                'label' => 'Date',
                 'attr' => ['class' => 'form-control']
             ])
         ;
     }
-
-    public function configureOptions(OptionsResolver $resolver): void
+    // ... existing code ...
+   public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => Experience::class,

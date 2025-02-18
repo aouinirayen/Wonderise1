@@ -1,50 +1,70 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Experience{% endblock %}
+{% block title %}{{ experience.titre }}{% endblock %}
 
 {% block body %}
-    <h1>Experience</h1>
+<div class="container py-5">
+    <!-- Affichage de l'expérience -->
+    <div class="card mb-4">
+        <img src="{{ experience.url }}" class="card-img-top" alt="{{ experience.titre }}">
+        <div class="card-body">
+            <h1 class="card-title">{{ experience.titre }}</h1>
+            <p class="card-text">{{ experience.description }}</p>
+            <div class="meta-info text-muted mb-3">
+                <i class="fas fa-map-marker-alt"></i> {{ experience.lieu }}
+                <span class="mx-2">|</span>
+                <i class="fas fa-tag"></i> {{ experience.categorie }}
+                <span class="mx-2">|</span>
+                <i class="far fa-clock"></i> {{ experience.dateCreation|date('d/m/Y H:i') }}
+            </div>
+        </div>
+    </div>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ experience.id }}</td>
-            </tr>
-            <tr>
-                <th>Titre</th>
-                <td>{{ experience.titre }}</td>
-            </tr>
-            <tr>
-                <th>Description</th>
-                <td>{{ experience.description }}</td>
-            </tr>
-            <tr>
-                <th>Url</th>
-                <td>{{ experience.url }}</td>
-            </tr>
-            <tr>
-                <th>Lieu</th>
-                <td>{{ experience.lieu }}</td>
-            </tr>
-            <tr>
-                <th>Categorie</th>
-                <td>{{ experience.categorie }}</td>
-            </tr>
-            <tr>
-                <th>Id_client</th>
-                <td>{{ experience.idClient }}</td>
-            </tr>
-            <tr>
-                <th>Rating</th>
-                <td>{{ experience.rating }}</td>
-            </tr>
-        </tbody>
-    </table>
+    <!-- Section commentaires -->
+    <div class="comments-section">
+        <h3 class="mb-4">Commentaires</h3>
+        
+        <!-- Formulaire de commentaire -->
+        <div class="card mb-4">
+            <div class="card-body">
+                {{ form_start(commentForm) }}
+                    <div class="mb-3">
+                        {{ form_row(commentForm.contenu, {
+                            'label': 'Votre commentaire',
+                            'attr': {
+                                'class': 'form-control',
+                                'placeholder': 'Partagez votre avis...',
+                                'rows': '3'
+                            }
+                        }) }}
+                    </div>
+                    <button type="submit" class="btn btn-primary">Publier le commentaire</button>
+                {{ form_end(commentForm) }}
+            </div>
+        </div>
 
-    <a href="{{ path('app_experience_index') }}">back to list</a>
-
-    <a href="{{ path('app_experience_edit', {'id': experience.id}) }}">edit</a>
-
-    {{ include('experience/_delete_form.html.twig') }}
+        <!-- Liste des commentaires -->
+        <div class="comments-list">
+            {% for commentaire in commentaires %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <h6 class="card-subtitle mb-2 text-muted">
+                                <i class="fas fa-user"></i> Utilisateur
+                                <small class="ms-2">
+                                    <i class="far fa-clock"></i> {{ commentaire.dateCreation|date('d/m/Y H:i') }}
+                                </small>
+                            </h6>
+                        </div>
+                        <p class="card-text">{{ commentaire.contenu }}</p>
+                    </div>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    Aucun commentaire pour le moment. Soyez le premier à commenter !
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
 {% endblock %}

@@ -1633,134 +1633,101 @@
 	<div class="container-fluid blog py-5">
 		<div class="container py-5">
 			<div class="mx-auto text-center mb-5" style="max-width: 900px;">
-				<h5 class="section-title px-3">Our Blog</h5>
-				<h1 class="mb-4">Popular Travel Blogs</h1>
-				<p class="mb-0">Lorem ipsum dolor sit amet consectetur adipisicing elit. Deleniti deserunt tenetur sapiente atque. Magni non explicabo beatae sit, vel reiciendis consectetur numquam id similique sunt error obcaecati ducimus officia maiores.
-				</p>
+				<h5 class="section-title px-3">Nos Expériences</h5>
+				<h1 class="mb-4">Partagez votre expérience</h1>
 			</div>
+
+			<!-- Formulaire de nouvelle expérience -->
+			<div class="row justify-content-center mb-5">
+				<div class="col-lg-8">
+					<div class="card">
+						<div class="card-body">
+							{{ form_start(experienceForm) }}
+								<div class="row">
+									<div class="col-md-6 mb-3">
+										{{ form_row(experienceForm.titre, {
+											'label': 'Titre de l\'expérience',
+											'attr': {
+												'class': 'form-control',
+												'placeholder': 'Donnez un titre à votre expérience'
+											}
+										}) }}
+									</div>
+									<div class="col-md-6 mb-3">
+										{{ form_row(experienceForm.lieu, {
+											'label': 'Lieu',
+											'attr': {
+												'class': 'form-control',
+												'placeholder': 'Où était-ce ?'
+											}
+										}) }}
+									</div>
+								</div>
+								<div class="mb-3">
+									{{ form_row(experienceForm.description, {
+										'label': 'Description',
+										'attr': {
+											'class': 'form-control',
+											'placeholder': 'Racontez votre expérience...',
+											'rows': '4'
+										}
+									}) }}
+								</div>
+								<div class="row">
+									<div class="col-md-6 mb-3">
+										{{ form_row(experienceForm.url, {
+											'label': 'URL de l\'image',
+											'attr': {
+												'class': 'form-control',
+												'placeholder': 'Lien vers votre image'
+											}
+										}) }}
+									</div>
+									<div class="col-md-6 mb-3">
+										{{ form_row(experienceForm.categorie, {
+											'label': 'Catégorie',
+											'attr': {
+												'class': 'form-control'
+											}
+										}) }}
+									</div>
+								</div>
+								<div class="text-center">
+									<button type="submit" class="btn btn-primary rounded-pill py-3 px-5">
+										<i class="fas fa-paper-plane me-2"></i>Partager mon expérience
+									</button>
+								</div>
+							{{ form_end(experienceForm) }}
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Liste des expériences -->
 			<div class="row g-4 justify-content-center">
-				<div class="col-lg-4 col-md-6">
-					<div class="blog-item">
-						<div class="blog-img">
-							<div class="blog-img-inner">
-								<img class="img-fluid w-100 rounded-top" src="{{ asset('frontOffice/img/blog-1.jpg') }}" alt="Image">
-								<div class="blog-icon">
-									<a href="#" class="my-auto">
-										<i class="fas fa-link fa-2x text-white"></i>
-									</a>
+				{% for experience in experiences %}
+					<div class="col-lg-4 col-md-6">
+						<div class="blog-item">
+							<div class="blog-img">
+								<div class="blog-img-inner">
+									<img class="img-fluid w-100 rounded-top" src="{{ experience.url }}" alt="{{ experience.titre }}">
 								</div>
 							</div>
-							<div class="blog-info d-flex align-items-center border border-start-0 border-end-0">
-								<small class="flex-fill text-center border-end py-2">
-									<i class="fa fa-calendar-alt text-primary me-2"></i>28 Jan 2050</small>
-								<a href="#" class="btn-hover flex-fill text-center text-white border-end py-2">
-									<i class="fa fa-thumbs-up text-primary me-2"></i>1.7K</a>
-								<a href="#" class="btn-hover flex-fill text-center text-white py-2">
-									<i class="fa fa-comments text-primary me-2"></i>1K</a>
+							<div class="blog-content border border-top-0 rounded-bottom p-4">
+								<p class="mb-3">{{ experience.lieu }} | {{ experience.categorie }}</p>
+								<h4 class="mb-3">{{ experience.titre }}</h4>
+								<p class="mb-4">{{ experience.description|slice(0, 150) }}...</p>
+								<a href="{{ path('app_experience_show', {'id': experience.id}) }}" class="btn btn-primary rounded-pill py-2 px-4">
+									Lire plus <i class="fas fa-arrow-right ms-2"></i>
+								</a>
 							</div>
-						</div>
-						<div class="blog-content border border-top-0 rounded-bottom p-4">
-							<p class="mb-3">Posted By: Royal Hamblin
-							</p>
-							<a href="#" class="h4">Adventures Trip</a>
-							<p class="my-3">Tempor erat elitr rebum at clita. Diam dolor diam ipsum sit diam amet diam eos</p>
-							<a href="#" class="btn btn-primary rounded-pill py-2 px-4">Read More</a>
 						</div>
 					</div>
-				</div>
-				<div class="col-lg-4 col-md-6">
-					<div class="blog-item">
-						<div class="blog-img">
-							<div class="blog-img-inner">
-								<img class="img-fluid w-100 rounded-top" src="{{ asset('frontOffice/img/blog-2.jpg') }}" alt="Image">
-								<div class="blog-icon">
-									<a href="#" class="my-auto">
-										<i class="fas fa-link fa-2x text-white"></i>
-									</a>
-								</div>
-							</div>
-							<div class="blog-info d-flex align-items-center border border-start-0 border-end-0">
-								<small class="flex-fill text-center border-end py-2">
-									<i class="fa fa-calendar-alt text-primary me-2"></i>28 Jan 2050</small>
-								<a href="#" class="btn-hover flex-fill text-center text-white border-end py-2">
-									<i class="fa fa-thumbs-up text-primary me-2"></i>1.7K</a>
-								<a href="#" class="btn-hover flex-fill text-center text-white py-2">
-									<i class="fa fa-comments text-primary me-2"></i>1K</a>
-							</div>
-						</div>
-						<div class="blog-content border border-top-0 rounded-bottom p-4">
-							<p class="mb-3">Posted By: Royal Hamblin
-							</p>
-							<a href="#" class="h4">Adventures Trip</a>
-							<p class="my-3">Tempor erat elitr rebum at clita. Diam dolor diam ipsum sit diam amet diam eos</p>
-							<a href="#" class="btn btn-primary rounded-pill py-2 px-4">Read More</a>
-						</div>
-					</div>
-				</div>
-				<div class="col-lg-4 col-md-6">
-					<div class="blog-item">
-						<div class="blog-img">
-							<div class="blog-img-inner">
-								<img class="img-fluid w-100 rounded-top" src="{{ asset('frontOffice/img/blog-3.jpg') }}" alt="Image">
-								<div class="blog-icon">
-									<a href="#" class="my-auto">
-										<i class="fas fa-link fa-2x text-white"></i>
-									</a>
-								</div>
-							</div>
-							<div class="blog-info d-flex align-items-center border border-start-0 border-end-0">
-								<small class="flex-fill text-center border-end py-2">
-									<i class="fa fa-calendar-alt text-primary me-2"></i>28 Jan 2050</small>
-								<a href="#" class="btn-hover flex-fill text-center text-white border-end py-2">
-									<i class="fa fa-thumbs-up text-primary me-2"></i>1.7K</a>
-								<a href="#" class="btn-hover flex-fill text-center text-white py-2">
-									<i class="fa fa-comments text-primary me-2"></i>1K</a>
-							</div>
-						</div>
-						<div class="blog-content border border-top-0 rounded-bottom p-4">
-							<p class="mb-3">Posted By: Royal Hamblin
-							</p>
-							<a href="#" class="h4">Adventures Trip</a>
-							<p class="my-3">Tempor erat elitr rebum at clita. Diam dolor diam ipsum sit diam amet diam eos</p>
-							<a href="#" class="btn btn-primary rounded-pill py-2 px-4">Read More</a>
-						</div>
-					</div>
-				</div>
+				{% endfor %}
 			</div>
 		</div>
 	</div>
 	<!-- Blog End -->
-	  <!-- Topbar Start -->
-        <div class="container-fluid bg-primary px-5 d-none d-lg-block">
-            <div class="row gx-0">
-                <div class="col-lg-8 text-center text-lg-start mb-2 mb-lg-0">
-                    <div class="d-inline-flex align-items-center" style="height: 45px;">
-                        <a class="btn btn-sm btn-outline-light btn-sm-square rounded-circle me-2" href=""><i class="fab fa-twitter fw-normal"></i></a>
-                        <a class="btn btn-sm btn-outline-light btn-sm-square rounded-circle me-2" href=""><i class="fab fa-facebook-f fw-normal"></i></a>
-                        <a class="btn btn-sm btn-outline-light btn-sm-square rounded-circle me-2" href=""><i class="fab fa-linkedin-in fw-normal"></i></a>
-                        <a class="btn btn-sm btn-outline-light btn-sm-square rounded-circle me-2" href=""><i class="fab fa-instagram fw-normal"></i></a>
-                        <a class="btn btn-sm btn-outline-light btn-sm-square rounded-circle" href=""><i class="fab fa-youtube fw-normal"></i></a>
-                    </div>
-                </div>
-                <div class="col-lg-4 text-center text-lg-end">
-                    <div class="d-inline-flex align-items-center" style="height: 45px;">
-                        <a href="#"><small class="me-3 text-light"><i class="fa fa-user me-2"></i>Register</small></a>
-                        <a href="#"><small class="me-3 text-light"><i class="fa fa-sign-in-alt me-2"></i>Login</small></a>
-                        <div class="dropdown">
-                            <a href="#" class="dropdown-toggle text-light" data-bs-toggle="dropdown"><small><i class="fa fa-home me-2"></i> My Dashboard</small></a>
-                            <div class="dropdown-menu rounded">
-                                <a href="#" class="dropdown-item"><i class="fas fa-user-alt me-2"></i> My Profile</a>
-                                <a href="#" class="dropdown-item"><i class="fas fa-comment-alt me-2"></i> Inbox</a>
-                                <a href="#" class="dropdown-item"><i class="fas fa-bell me-2"></i> Notifications</a>
-                                <a href="#" class="dropdown-item"><i class="fas fa-cog me-2"></i> Account Settings</a>
-                                <a href="#" class="dropdown-item"><i class="fas fa-power-off me-2"></i> Log Out</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Topbar End -->
 
 	<!-- Testimonial Start -->
 	<div class="container-fluid testimonial py-5">

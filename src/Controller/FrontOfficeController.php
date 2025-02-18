@@ -2,16 +2,39 @@
 
 namespace App\Controller;
 
+use App\Repository\ExperienceRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Annotation\Route;
+use App\Entity\Experience;
+use App\Form\ExperienceType;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\Request;
 
-final class FrontOfficeController extends AbstractController{
-    #[Route('/', name: 'app_front_office')]
-    public function index(): Response
-    {
+class FrontOfficeController extends AbstractController
+{
+    #[Route('/front_office', name: 'app_front_office')]
+    public function index(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        ExperienceRepository $experienceRepository
+    ): Response {
+        $experience = new Experience();
+        $form = $this->createForm(ExperienceType::class, $experience);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $experience->setIdClient('user'); // À remplacer par l'ID de l'utilisateur connecté
+            $entityManager->persist($experience);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Votre expérience a été partagée avec succès !');
+            return $this->redirectToRoute('app_front_office');
+        }
+
         return $this->render('front_office/index.html.twig', [
-            'controller_name' => 'FrontOfficeController',
+            'experiences' => $experienceRepository->findAll(),
+            'experienceForm' => $form->createView(),
         ]);
     }
 

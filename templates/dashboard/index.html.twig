@@ -1,0 +1,199 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block body %}
+<main class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <div class="fs-3">Dashboard</div>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-end">
+                        <li class="breadcrumb-item"><a href="{{ path('app_front_office') }}">Home</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="content">
+        <div class="container-fluid">
+            <!-- Statistics Boxes -->
+            <div class="row">
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-primary">
+                        <div class="inner">
+                            <h3>{{ experiences|length }}</h3>
+                            <p>Total Experiences</p>
+                        </div>
+                        <div class="icon">
+                            <i class="inner-icon fas fa-globe"></i>
+                        </div>
+                        <a href="{{ path('app_experience_index') }}" class="small-box-footer">View All <i class="fas fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-success">
+                        <div class="inner">
+                            <h3>{{ commentaires|length }}</h3>
+                            <p>Total Comments</p>
+                        </div>
+                        <div class="icon">
+                            <i class="inner-icon fas fa-comments"></i>
+                        </div>
+                        <a href="{{ path('app_commentaire_index') }}" class="small-box-footer">View All <i class="fas fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-warning">
+                        <div class="inner">
+                            <h3>{{ experiences|length > 0 ? (commentaires|length / experiences|length)|round(1) : 0 }}</h3>
+                            <p>Avg. Comments per Experience</p>
+                        </div>
+                        <div class="icon">
+                            <i class="inner-icon fas fa-chart-line"></i>
+                        </div>
+                        <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-danger">
+                        <div class="inner">
+                            <h3>{{ experiences|filter(e => e.dateCreation is defined and e.dateCreation|date('Y-m-d') == "now"|date('Y-m-d'))|length }}</h3>
+                            <p>New Experiences Today</p>
+                        </div>
+                        <div class="icon">
+                            <i class="inner-icon fas fa-plus-circle"></i>
+                        </div>
+                        <a href="{{ path('app_experience_new') }}" class="small-box-footer">Add New <i class="fas fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="row">
+                <!-- Recent Experiences -->
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-globe me-1"></i>
+                                Recent Experiences
+                            </h3>
+                            <div class="card-tools">
+                                <a href="{{ path('app_experience_new') }}" class="btn btn-tool">
+                                    <i class="fas fa-plus"></i> Add New
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-body table-responsive p-0">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Description</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for experience in experiences|slice(0, 5) %}
+                                    <tr>
+                                        <td>{{ experience.titre }}</td>
+                                        <td>{{ experience.description|slice(0, 50) }}...</td>
+                                        <td>{{ experience.dateCreation is defined ? experience.dateCreation|date('Y-m-d') : 'N/A' }}</td>
+                                        <td>
+                                            <a href="{{ path('app_experience_show', {'id': experience.id}) }}" class="btn btn-sm btn-info">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{{ path('app_experience_edit', {'id': experience.id}) }}" class="btn btn-sm btn-warning">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Comments -->
+                <div class="col-lg-4">
+                    <div class="card direct-chat direct-chat-primary">
+                        <div class="card-header">
+                            <h3 class="card-title">Recent Comments</h3>
+                            <div class="card-tools">
+                                <span class="badge bg-primary">{{ commentaires|length }} Total</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="direct-chat-messages" style="height: 400px;">
+                                {% for commentaire in commentaires|slice(0, 5) %}
+                                <div class="direct-chat-msg">
+                                    <div class="direct-chat-infos clearfix">
+                                        <span class="direct-chat-timestamp float-end">
+                                            {{ commentaire.dateCreation ? commentaire.dateCreation|date('d M H:i') : '' }}
+                                        </span>
+                                    </div>
+                                    <div class="direct-chat-text">
+                                        {{ commentaire.contenu|slice(0, 100) }}...
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <a href="{{ path('app_commentaire_index') }}" class="btn btn-primary btn-block">
+                                View All Comments
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Quick Actions</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <a href="{{ path('app_front_office') }}" class="btn btn-primary btn-lg w-100 mb-3">
+                                        <i class="fas fa-home me-2"></i> Front Office
+                                    </a>
+                                </div>
+                                <div class="col-md-3">
+                                    <a href="{{ path('app_back_office') }}" class="btn btn-info btn-lg w-100 mb-3">
+                                        <i class="fas fa-cog me-2"></i> Back Office
+                                    </a>
+                                </div>
+                                <div class="col-md-3">
+                                    <a href="{{ path('app_experience_new') }}" class="btn btn-success btn-lg w-100 mb-3">
+                                        <i class="fas fa-plus me-2"></i> New Experience
+                                    </a>
+                                </div>
+                                <div class="col-md-3">
+                                    <a href="{{ path('app_commentaire_index') }}" class="btn btn-warning btn-lg w-100 mb-3">
+                                        <i class="fas fa-comments me-2"></i> Manage Comments
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

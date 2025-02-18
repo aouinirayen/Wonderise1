@@ -1,0 +1,16 @@
+<h3>Commentaires</h3>
+
+{% for commentaire in experience.commentaires %}
+    <div class="comment">
+        <strong>{{ commentaire.auteur }}</strong> - <small>{{ commentaire.date|date('d/m/Y H:i') }}</small>
+        <p>{{ commentaire.contenu }}</p>
+    </div>
+{% else %}
+    <p>Aucun commentaire pour le moment.</p>
+{% endfor %}
+
+<h3>Ajouter un commentaire</h3>
+{{ form_start(form) }}
+    {{ form_widget(form) }}
+<button type="button" class="btn btn-primary">Envoyer</button>
+{{ form_end(form) }}

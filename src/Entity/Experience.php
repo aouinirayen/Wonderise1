@@ -5,6 +5,8 @@ namespace App\Entity;
 use App\Repository\ExperienceRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 #[ORM\Entity(repositoryClass: ExperienceRepository::class)]
 class Experience
@@ -32,10 +34,23 @@ class Experience
     #[ORM\Column(length: 255)]
     private ?string $id_client = null;
 
-    #[ORM\OneToMany(mappedBy: 'experience', targetEntity: Commentaire::class)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $date = null;
+
+    #[ORM\Column(name: 'date_creation', type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $dateCreation = null;
+
+
+    #[ORM\OneToMany(mappedBy: 'experience', targetEntity: Commentaire::class, cascade: ['persist', 'remove'])]
+     
     private $commentaires;
-    #[ORM\Column(type: 'integer')]
-    private int $rating;
+
+    public function __construct()
+    {
+        $this->dateCreation = new \DateTime();
+        $this->commentaires = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -119,25 +134,56 @@ class Experience
 
         return $this;
     }
-    public function getCommentaires(): ?string
+
+    public function getDate(): ?\DateTimeInterface
+    {
+        return $this->date;
+    }
+
+    public function setDate(\DateTimeInterface $date): static
+    {
+        $this->date = $date;
+
+        return $this;
+    }
+
+    public function getDateCreation(): ?\DateTimeInterface
+    {
+        return $this->dateCreation;
+    }
+
+    public function setDateCreation(\DateTimeInterface $dateCreation): self
+    {
+        $this->dateCreation = $dateCreation;
+        return $this;
+    }
+
+    /**
+     * @return Collection|Commentaire[]
+     */
+    public function getCommentaires(): Collection
     {
         return $this->commentaires;
     }
 
-    public function setCommentaires(string $commentaires): static
+    public function addCommentaire(Commentaire $commentaire): self
     {
-        $this->commentaires= $commentaires;
+        if (!$this->commentaires->contains($commentaire)) {
+            $this->commentaires[] = $commentaire;
+            $commentaire->setExperience($this);
+        }
 
         return $this;
     }
-    public function getRating(): ?int
-    {
-        return $this->rating;
-    }
 
-    public function setRating(int $rating): self
+    public function removeCommentaire(Commentaire $commentaire): self
     {
-        $this->rating = $rating;
+        if ($this->commentaires->removeElement($commentaire)) {
+            if ($commentaire->getExperience() === $this) {
+                $commentaire->setExperience(null);
+            }
+        }
+
         return $this;
     }
 }
