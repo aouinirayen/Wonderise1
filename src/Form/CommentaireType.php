@@ -9,6 +9,8 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Length;
 
 class CommentaireType extends AbstractType
 {
@@ -16,13 +18,19 @@ class CommentaireType extends AbstractType
     {
         $builder
             ->add('auteur', TextType::class, [
-                'label' => 'Votre nom'
+                'label' => 'Votre nom',
+                'attr' => ['class' => 'form-control']
             ])
             ->add('contenu', TextareaType::class, [
-                'label' => 'Votre commentaire'
+                'label' => 'Votre commentaire',
+                'attr' => [
+                    'class' => 'form-control',
+                    'rows' => 4
+                ]
             ])
             ->add('submit', SubmitType::class, [
-                'label' => 'Envoyer'
+                'label' => 'Envoyer',
+                'attr' => ['class' => 'btn btn-primary']
             ]);
     }
 
@@ -30,6 +38,9 @@ class CommentaireType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Commentaire::class,
+            'attr' => [
+                'novalidate' => 'novalidate',
+            ]
         ]);
     }
 }

@@ -44,32 +44,17 @@ final class ExperienceController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_experience_show', methods: ['GET', 'POST'])]
-    public function show(
-        Request $request,
-        Experience $experience,
-        EntityManagerInterface $entityManager
-    ): Response {
-        // Créer le formulaire de commentaire
+    #[Route('/{id}', name: 'app_experience_show', methods: ['GET'])]
+    public function show(Experience $experience): Response
+    {
         $commentaire = new Commentaire();
         $commentaire->setExperience($experience);
-        $commentaire->setDateCreation(new \DateTime());
-        
-        $form = $this->createForm(CommentaireType::class, $commentaire);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($commentaire);
-            $entityManager->flush();
-
-            $this->addFlash('success', 'Votre commentaire a été ajouté avec succès !');
-            return $this->redirectToRoute('app_experience_show', ['id' => $experience->getId()]);
-        }
+        $commentForm = $this->createForm(CommentaireType::class, $commentaire);
 
         return $this->render('experience/show.html.twig', [
             'experience' => $experience,
+            'commentForm' => $commentForm->createView(),
             'commentaires' => $experience->getCommentaires(),
-            'commentForm' => $form->createView(),
         ]);
     }
 

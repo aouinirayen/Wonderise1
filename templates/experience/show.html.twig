@@ -24,47 +24,128 @@
     <div class="comments-section">
         <h3 class="mb-4">Commentaires</h3>
         
-        <!-- Formulaire de commentaire -->
-        <div class="card mb-4">
-            <div class="card-body">
-                {{ form_start(commentForm) }}
-                    <div class="mb-3">
-                        {{ form_row(commentForm.contenu, {
-                            'label': 'Votre commentaire',
-                            'attr': {
-                                'class': 'form-control',
-                                'placeholder': 'Partagez votre avis...',
-                                'rows': '3'
-                            }
-                        }) }}
+        <!-- Affichage des commentaires existants -->
+        <div class="commentaires">
+            {% if commentaires is not empty %}
+                {% for commentaire in commentaires %}
+                    <div class="commentaire card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h5 class="card-title">{{ commentaire.auteur }}</h5>
+                                    <small class="text-muted">{{ commentaire.date|date('d/m/Y H:i') }}</small>
+                                </div>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-sm btn-outline-primary" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#editModal{{ commentaire.id }}">
+                                        <i class="fas fa-edit"></i> Modifier
+                                    </button>
+                                    <form action="{{ path('commentaire_delete', {'id': commentaire.id}) }}" method="post" class="d-inline">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ commentaire.id) }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce commentaire ?')">
+                                            <i class="fas fa-trash"></i> Supprimer
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                            <p class="card-text mt-2">{{ commentaire.contenu }}</p>
+                        </div>
                     </div>
-                    <button type="submit" class="btn btn-primary">Publier le commentaire</button>
-                {{ form_end(commentForm) }}
-            </div>
+
+                    <!-- Modal pour la modification -->
+                    <div class="modal fade" id="editModal{{ commentaire.id }}" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Modifier le commentaire</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <form action="{{ path('commentaire_edit', {'id': commentaire.id}) }}" method="post">
+                                    <div class="modal-body">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('edit' ~ commentaire.id) }}">
+                                        <div class="form-group">
+                                            <label for="contenu{{ commentaire.id }}">Votre commentaire</label>
+                                            <textarea class="form-control" id="contenu{{ commentaire.id }}" 
+                                                      name="contenu" rows="4">{{ commentaire.contenu }}</textarea>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>Aucun commentaire pour le moment.</p>
+            {% endif %}
         </div>
 
-        <!-- Liste des commentaires -->
-        <div class="comments-list">
-            {% for commentaire in commentaires %}
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <h6 class="card-subtitle mb-2 text-muted">
-                                <i class="fas fa-user"></i> Utilisateur
-                                <small class="ms-2">
-                                    <i class="far fa-clock"></i> {{ commentaire.dateCreation|date('d/m/Y H:i') }}
-                                </small>
-                            </h6>
-                        </div>
-                        <p class="card-text">{{ commentaire.contenu }}</p>
+        <!-- Formulaire d'ajout de commentaire -->
+        <div class="nouveau-commentaire">
+            <h3>Ajouter un commentaire</h3>
+            {{ form_start(commentForm, {
+                'action': path('commentaire_add', {'id': experience.id}),
+                'method': 'POST',
+                'attr': {'class': 'needs-validation'}
+            }) }}
+                <div class="form-group">
+                    {{ form_label(commentForm.auteur) }}
+                    {{ form_widget(commentForm.auteur) }}
+                    <div class="text-danger">
+                        {{ form_errors(commentForm.auteur) }}
                     </div>
                 </div>
-            {% else %}
-                <div class="alert alert-info">
-                    Aucun commentaire pour le moment. Soyez le premier à commenter !
+                
+                <div class="form-group mt-3">
+                    {{ form_label(commentForm.contenu) }}
+                    {{ form_widget(commentForm.contenu) }}
+                    <div class="text-danger">
+                        {{ form_errors(commentForm.contenu) }}
+                    </div>
                 </div>
-            {% endfor %}
+
+                <div class="mt-3">
+                    {{ form_widget(commentForm.submit) }}
+                </div>
+            {{ form_end(commentForm) }}
         </div>
+
+        <!-- Affichage des messages flash -->
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success">
+                {{ message }}
+            </div>
+        {% endfor %}
+
+        {% for message in app.flashes('error') %}
+            <div class="alert alert-danger">
+                {{ message }}
+            </div>
+        {% endfor %}
     </div>
 </div>
+
+<style>
+    .commentaire {
+        border: 1px solid #dee2e6;
+        border-radius: 0.25rem;
+        margin-bottom: 1rem;
+    }
+    .btn-group .btn {
+        margin-left: 0.25rem;
+    }
+    .form-error {
+        color: red;
+        font-size: 0.9em;
+        margin-top: 5px;
+    }
+    .text-danger {
+        color: red !important;
+    }
+</style>
 {% endblock %}
