@@ -3,7 +3,11 @@
 {% for commentaire in experience.commentaires %}
     <div class="comment">
         <strong>{{ commentaire.auteur }}</strong> - <small>{{ commentaire.date|date('d/m/Y H:i') }}</small>
+        {% if commentaire.dateModification %}
+            <br><small class="text-muted">Modifié le : {{ commentaire.dateModification|date('d/m/Y H:i') }}</small>
+        {% endif %}
         <p>{{ commentaire.contenu }}</p>
+
     </div>
 {% else %}
     <p>Aucun commentaire pour le moment.</p>
@@ -13,4 +17,4 @@
 {{ form_start(form) }}
     {{ form_widget(form) }}
 <button type="button" class="btn btn-primary">Envoyer</button>
-{{ form_end(form) }} 
+{{ form_end(form) }}

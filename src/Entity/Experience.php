@@ -87,9 +87,13 @@ class Experience
     #[ORM\OneToMany(mappedBy: 'experience', targetEntity: Commentaire::class, orphanRemoval: true)]
     private Collection $commentaires;
 
+    #[ORM\OneToMany(mappedBy: 'experience', targetEntity: Rating::class, orphanRemoval: true)]
+    private Collection $ratings;
+
     public function __construct()
     {
         $this->commentaires = new ArrayCollection();
+        $this->ratings = new ArrayCollection();
         $this->dateCreation = new \DateTime();
     }
 
@@ -227,5 +231,46 @@ class Experience
         }
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, Rating>
+     */
+    public function getRatings(): Collection
+    {
+        return $this->ratings;
+    }
+
+    public function addRating(Rating $rating): self
+    {
+        if (!$this->ratings->contains($rating)) {
+            $this->ratings->add($rating);
+            $rating->setExperience($this);
+        }
+        return $this;
+    }
+
+    public function removeRating(Rating $rating): self
+    {
+        if ($this->ratings->removeElement($rating)) {
+            if ($rating->getExperience() === $this) {
+                $rating->setExperience(null);
+            }
+        }
+        return $this;
+    }
+
+    public function getAverageRating(): float
+    {
+        if ($this->ratings->isEmpty()) {
+            return 0;
+        }
+
+        $sum = 0;
+        foreach ($this->ratings as $rating) {
+            $sum += $rating->getValue();
+        }
+
+        return $sum / $this->ratings->count();
     }
 }

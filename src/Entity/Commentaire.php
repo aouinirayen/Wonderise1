@@ -44,14 +44,24 @@ class Commentaire
     #[ORM\Column(name: 'date_creation', type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $dateCreation = null;
 
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $dateModification = null;
+
     #[ORM\ManyToOne(targetEntity: Experience::class, inversedBy: "commentaires")]
     #[ORM\JoinColumn(nullable: false)]
     private ?Experience $experience = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $sentiment = null;
+
+    #[ORM\Column(type: Types::FLOAT, nullable: true)]
+    private ?float $sentimentScore = null;
 
     public function __construct()
     {
         $this->date = new \DateTime();
         $this->dateCreation = new \DateTime();
+        $this->dateModification = new \DateTime();
     }
 
     public function getId(): ?int
@@ -111,6 +121,39 @@ class Commentaire
     public function setDateCreation(\DateTimeInterface $dateCreation): self
     {
         $this->dateCreation = $dateCreation;
+        return $this;
+    }
+
+    public function getDateModification(): ?\DateTimeInterface
+    {
+        return $this->dateModification;
+    }
+
+    public function setDateModification(\DateTimeInterface $dateModification): self
+    {
+        $this->dateModification = $dateModification;
+        return $this;
+    }
+
+    public function getSentiment(): ?string
+    {
+        return $this->sentiment;
+    }
+
+    public function setSentiment(?string $sentiment): self
+    {
+        $this->sentiment = $sentiment;
+        return $this;
+    }
+
+    public function getSentimentScore(): ?float
+    {
+        return $this->sentimentScore;
+    }
+
+    public function setSentimentScore(?float $score): self
+    {
+        $this->sentimentScore = $score;
         return $this;
     }
 }

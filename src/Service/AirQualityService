@@ -1,0 +1,35 @@
+namespace App\Service;
+
+use Symfony\Contracts\HttpClient\HttpClientInterface;
+
+class AirQualityService
+{
+    private HttpClientInterface $client;
+    private string $apiKey;
+
+    public function __construct(HttpClientInterface $client, string $apiKey)
+    {
+        $this->client = $client;
+        $this->apiKey = $apiKey;
+    }
+
+    public function getAirQuality(string $city): array
+    {
+        try {
+            $response = $this->client->request('GET', 'https://api.api-ninjas.com/v1/airquality', [
+                'query' => ['city' => $city],
+                'headers' => [
+                    'X-Api-Key' => $this->apiKey,
+                ]
+            ]);
+
+            if ($response->getStatusCode() !== 200) {
+                return ['error' => 'Impossible de récupérer la qualité de l\'air pour cette ville.'];
+            }
+
+            return $response->toArray();
+        } catch (\Exception $e) {
+            return ['error' => 'Erreur lors de la récupération des données : ' . $e->getMessage()];
+        }
+    }
+}

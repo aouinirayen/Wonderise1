@@ -1,0 +1,16 @@
+namespace App\Controller;
+
+use App\Service\AirQualityService;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Routing\Annotation\Route;
+
+class AirQualityController extends AbstractController
+{
+    #[Route('/airquality/{city}', name: 'air_quality', methods: ['GET'])]
+    public function index(string $city, AirQualityService $airQualityService): JsonResponse
+    {
+        $data = $airQualityService->getAirQuality($city);
+        return $this->json($data);
+    }
+}

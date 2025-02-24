@@ -34,6 +34,20 @@
                                 <div>
                                     <h5 class="card-title">{{ commentaire.auteur }}</h5>
                                     <small class="text-muted">{{ commentaire.date|date('d/m/Y H:i') }}</small>
+                                    
+                                    {# Affichage du sentiment #}
+                                    {% if commentaire.sentiment %}
+                                        <span class="badge {% if commentaire.sentiment == 'positif' %}bg-success{% elseif commentaire.sentiment == 'négatif' %}bg-danger{% else %}bg-secondary{% endif %} ms-2">
+                                            {% if commentaire.sentiment == 'positif' %}
+                                                <i class="fas fa-smile"></i>
+                                            {% elseif commentaire.sentiment == 'négatif' %}
+                                                <i class="fas fa-frown"></i>
+                                            {% else %}
+                                                <i class="fas fa-meh"></i>
+                                            {% endif %}
+                                            {{ commentaire.sentiment|capitalize }}
+                                        </span>
+                                    {% endif %}
                                 </div>
                                 <div class="btn-group">
                                     <button type="button" class="btn btn-sm btn-outline-primary" 
@@ -51,6 +65,13 @@
                                 </div>
                             </div>
                             <p class="card-text mt-2">{{ commentaire.contenu }}</p>
+                            
+                            {# Score du sentiment (optionnel, vous pouvez le cacher) #}
+                            {% if commentaire.sentimentScore is not null %}
+                                <small class="text-muted">
+                                    Score: {{ commentaire.sentimentScore|number_format(2) }}
+                                </small>
+                            {% endif %}
                         </div>
                     </div>
 
@@ -146,6 +167,26 @@
     }
     .text-danger {
         color: red !important;
+    }
+    .badge {
+        font-size: 0.8em;
+        padding: 0.4em 0.8em;
+    }
+    
+    .badge i {
+        margin-right: 0.3em;
+    }
+    
+    .bg-success {
+        background-color: #28a745 !important;
+    }
+    
+    .bg-danger {
+        background-color: #dc3545 !important;
+    }
+    
+    .bg-secondary {
+        background-color: #6c757d !important;
     }
 </style>
 {% endblock %}

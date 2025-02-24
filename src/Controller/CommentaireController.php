@@ -12,6 +12,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use App\Entity\Experience;
 use App\Repository\CommentaireRepository;
+use App\Service\SentimentAnalysisService;
 
 #[Route('/commentaire')]
 class CommentaireController extends AbstractController
@@ -35,7 +36,7 @@ class CommentaireController extends AbstractController
         $contenu = $request->request->get('contenu');
         if (!empty($contenu)) {
             $commentaire->setContenu($contenu);
-            $commentaire->setDateCreation(new \DateTime());
+            $commentaire->setDateModification(new \DateTime());
             
             $entityManager->flush();
             $this->addFlash('success', 'Commentaire modifié avec succès !');
@@ -65,26 +66,36 @@ class CommentaireController extends AbstractController
     }
 
     #[Route('/experience/{id}/comment', name: 'commentaire_add', methods: ['POST'])]
-    public function addComment(Request $request, Experience $experience, EntityManagerInterface $entityManager): Response
-    {
+    public function addComment(
+        Request $request, 
+        Experience $experience, 
+        EntityManagerInterface $entityManager,
+        SentimentAnalysisService $sentimentAnalyzer
+    ): Response {
         $commentaire = new Commentaire();
         $commentaire->setExperience($experience);
         
         $form = $this->createForm(CommentaireType::class, $commentaire);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted()) {
-            if ($form->isValid()) {
-                $entityManager->persist($commentaire);
-                $entityManager->flush();
-
-                $this->addFlash('success', 'Votre commentaire a été ajouté avec succès !');
-                return $this->redirectToRoute('app_experience_show', ['id' => $experience->getId()]);
-            } else {
-                foreach ($form->getErrors(true) as $error) {
-                    $this->addFlash('error', $error->getMessage());
-                }
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Analyser le sentiment du commentaire
+            $sentiment = $sentimentAnalyzer->analyzeSentiment($commentaire->getContenu());
+            
+            // Sauvegarder le sentiment et le score
+            $commentaire->setSentiment($sentiment['sentiment']);
+            $commentaire->setSentimentScore($sentiment['score']);
+            
+            // Ajouter un message d'avertissement si nécessaire
+            if ($sentiment['sentiment'] === 'négatif') {
+                $this->addFlash('warning', 'Votre commentaire semble négatif. Merci de rester constructif.');
             }
+
+            $entityManager->persist($commentaire);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Votre commentaire a été ajouté avec succès !');
+            return $this->redirectToRoute('app_experience_show', ['id' => $experience->getId()]);
         }
 
         return $this->redirectToRoute('app_experience_show', ['id' => $experience->getId()]);

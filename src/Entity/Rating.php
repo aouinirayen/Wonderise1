@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\RatingRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: RatingRepository::class)]
 class Rating
@@ -14,16 +15,22 @@ class Rating
     private ?int $id = null;
 
     #[ORM\Column]
-    private ?int $itemId = null;
-
-    #[ORM\Column]
-    private ?int $userId = null;
-
-    #[ORM\Column]
+    #[Assert\Range(
+        min: 1,
+        max: 5,
+        notInRangeMessage: 'La note doit être entre {{ min }} et {{ max }}'
+    )]
     private ?float $value = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
+
+    #[ORM\ManyToOne(targetEntity: Experience::class, inversedBy: 'ratings')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Experience $experience = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $userId = null;
 
     public function __construct()
     {
@@ -33,28 +40,6 @@ class Rating
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getItemId(): ?int
-    {
-        return $this->itemId;
-    }
-
-    public function setItemId(int $itemId): static
-    {
-        $this->itemId = $itemId;
-        return $this;
-    }
-
-    public function getUserId(): ?int
-    {
-        return $this->userId;
-    }
-
-    public function setUserId(int $userId): static
-    {
-        $this->userId = $userId;
-        return $this;
     }
 
     public function getValue(): ?float
@@ -76,6 +61,28 @@ class Rating
     public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
+        return $this;
+    }
+
+    public function getExperience(): ?Experience
+    {
+        return $this->experience;
+    }
+
+    public function setExperience(?Experience $experience): self
+    {
+        $this->experience = $experience;
+        return $this;
+    }
+
+    public function getUserId(): ?string
+    {
+        return $this->userId;
+    }
+
+    public function setUserId(?string $userId): static
+    {
+        $this->userId = $userId;
         return $this;
     }
 } 
