@@ -1,0 +1,4 @@
+bazinga_js_translation:
+    locale_fallback: en
+    active_domains: ['messages'] # Active uniquement certaines traductions
+    active_locales: ['en', 'fr', 'es'] # Active ces langues

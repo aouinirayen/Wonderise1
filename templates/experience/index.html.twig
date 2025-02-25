@@ -1,23 +1,22 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Blog - Expériences{% endblock %}
+{% block title %}Blog - Experiences{% endblock %}
 
 {% block stylesheets %}
     <style>
         .blog-card {
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease;
         }
 
         .blog-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
         }
 
         .blog-img img {
-            border-top-left-radius: 12px;
-            border-top-right-radius: 12px;
             width: 100%;
             height: 250px;
             object-fit: cover;
@@ -27,29 +26,35 @@
             padding: 20px;
         }
 
+        .blog-content h4 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
         .blog-meta {
             font-size: 0.9rem;
-            color: #6c757d;
+            color: #777;
+            margin-bottom: 10px;
+        }
+
+        .blog-description {
+            font-size: 1rem;
+            color: #555;
+            margin-bottom: 15px;
         }
 
         .btn-read-more {
-            display: inline-flex;
-            align-items: center;
-            background-color: #007bff;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 6px;
-            transition: background-color 0.3s ease;
             text-decoration: none;
-            font-weight: 500;
+            color: white;
+            background-color: #007bff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: inline-block;
         }
 
         .btn-read-more:hover {
             background-color: #0056b3;
-        }
-
-        .btn-read-more i {
-            margin-left: 8px;
         }
     </style>
 {% endblock %}
@@ -57,39 +62,32 @@
 {% block body %}
     <div class="container py-5">
         <div class="text-center mb-5">
-            <h1 class="fw-bold">🌍 Explorez Nos Expériences</h1>
-            <p class="text-muted">Découvrez des aventures et des cultures fascinantes à travers le monde.</p>
-            <a href="{{ path('app_experience_new') }}" class="btn btn-primary shadow-sm">
-                ➕ Nouvelle publication
-            </a>
+            <h1>🌍 Explore Our Experiences</h1>
+            <p>Découvrez des aventures et des cultures fascinantes à travers le monde.</p>
+            <a href="{{ path('app_experience_new') }}" class="btn btn-primary">➕ Nouvelle publication</a>
         </div>
 
         <div class="row">
             {% for experience in experiences %}
-                <div class="col-md-6 col-lg-4 mb-4">
-                    <div class="card blog-card">
+                <div class="col-md-6 mb-4">
+                    <div class="blog-card">
                         <!-- Image -->
                         <div class="blog-img">
                             <img src="{{ experience.getURl() ?: 'default.jpg' }}" alt="{{ experience.getTitre() }}">
                         </div>
 
                         <!-- Contenu -->
-                        <div class="card-body blog-content">
-                            <h4 class="card-title fw-bold">{{ experience.getTitre() }}</h4>
-                            <p class="blog-meta"><i class="bi bi-clock"></i> Publié le {{ experience.getDate()|date('d/m/Y') }}</p>
-                            <p class="card-text text-muted">
-                                {{ experience.getDescription()|length > 100 ? experience.getDescription()|slice(0, 100) ~ '...' : experience.getDescription() }}
-                            </p>
-                            <a href="{{ path('app_experience_show', {'id': experience.getId()}) }}" class="btn-read-more">
-                                📖 Lire la suite <i class="bi bi-arrow-right"></i>
-                            </a>
+                        <div class="blog-content">
+                            <h4>{{ experience.getTitre() }}</h4>
+                            <p class="blog-meta">🕒 Publié le {{ experience.getDate()|date('d/m/Y') }}</p>
+                            <p class="blog-description">{{ experience.getDescription()|length > 100 ? experience.getDescription()|slice(0, 100) ~ '...' : experience.getDescription() }}</p>
+                            <a href="{{ path('app_experience_show', {'id': experience.getId()}) }}" class="btn-read-more">📖 Lire la suite</a>
                         </div>
                     </div>
                 </div>
             {% else %}
-                <p class="text-center text-muted">Aucune expérience publiée pour le moment.</p>
+                <p class="text-center">Aucune expérience publiée pour le moment.</p>
             {% endfor %}
         </div>
     </div>
 {% endblock %}
-

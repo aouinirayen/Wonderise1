@@ -1,4 +1,32 @@
-{{ form_start(form) }}
-    {{ form_widget(form) }}
-    <button class="btn btn-primary">{{ button_label|default('Save') }}</button>
-{{ form_end(form) }}
+<div class="container py-4">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h2 class="card-title text-center mb-4">{{ title|default('Formulaire') }}</h2>
+
+            {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+            
+            {% for field in form %}
+                <div class="mb-3">
+                    {{ form_label(field, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                    {{ form_widget(field, {'attr': {'class': 'form-control'}}) }}
+                    
+                    {% if field.vars.errors|length > 0 %}
+                        <div class="text-danger mt-1">
+                            {% for error in field.vars.errors %}
+                                <small>{{ error.message }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-primary btn-lg fw-bold shadow-sm">
+                    <i class="bi bi-check-circle"></i> {{ button_label|default('Enregistrer') }}
+                </button>
+            </div>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
