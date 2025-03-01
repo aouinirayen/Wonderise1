@@ -40,4 +40,18 @@ class ExperienceRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+    public function searchByLieu(string $searchTerm = ''): array
+    {
+        $qb = $this->createQueryBuilder('e');
+        
+        if ($searchTerm) {
+            $qb->andWhere('LOWER(e.lieu) LIKE LOWER(:searchTerm)')
+               ->setParameter('searchTerm', '%' . $searchTerm . '%');
+        }
+        
+        return $qb->orderBy('e.date', 'DESC')
+                 ->getQuery()
+                 ->getResult();
+    }
 }

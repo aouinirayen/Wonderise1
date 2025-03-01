@@ -3,10 +3,10 @@
 namespace App\Entity;
 
 use App\Repository\ExperienceRepository;
-use Doctrine\DBAL\Types\Types;
-use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
+use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ExperienceRepository::class)]
@@ -17,72 +17,68 @@ class Experience
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 100)]
-    #[Assert\NotBlank(message: 'Oops ! Le titre est requis pour partager votre expérience')]
+    #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Title is required to share your experience')]
     #[Assert\Length(
-        min: 2,
-        max: 100,
-        minMessage: 'Le titre est trop court ! Il doit faire au moins {{ limit }} caractères',
-        maxMessage: 'Le titre est trop long ! Il ne peut pas dépasser {{ limit }} caractères'
+        min: 10,
+        max: 255,
+        minMessage: 'Title is too short! It must be at least {{ 10 }} characters',
+        maxMessage: 'Title is too long! It cannot exceed {{ 255 }} characters'
     )]
     #[Assert\Regex(
         pattern: '/^[a-zA-Z0-9\s]+$/',
-        message: 'Le titre ne peut contenir que des lettres, des chiffres et des espaces'
+        message: 'Title can only contain letters, numbers, and spaces'
     )]
     private ?string $titre = null;
 
-    #[ORM\Column(type: 'text')]
-    #[Assert\NotBlank(message: 'Partagez votre histoire ! La description ne peut pas être vide')]
+    #[ORM\Column(type: Types::TEXT)]
+    #[Assert\NotBlank(message: 'Share your story! Description cannot be empty')]
     #[Assert\Length(
         min: 10,
         max: 500,
-        minMessage: 'Votre description est un peu courte ! Ajoutez au moins {{ limit }} caractères',
-        maxMessage: 'Votre description est trop longue ! Elle ne doit pas dépasser {{ limit }} caractères'
+        minMessage: 'Description must be at least {{ 20 }} characters long',
+        maxMessage: 'Description cannot exceed {{ 500 }} characters'
     )]
     private ?string $description = null;
 
-    #[ORM\Column(length: 255)]
-    #[Assert\NotBlank(message: ' L\'URL de l\'image est requise')]
-    #[Assert\Url(message: 'Hmm... Cette URL ne semble pas valide. Assurez-vous qu\'elle commence par http:// ou https://')]
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Url(message: 'Please enter a valid URL')]
     private ?string $url = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Assert\NotBlank(message: 'Le lieu est obligatoire !')]
-
+    #[Assert\NotBlank(message: 'Location is required')]
     #[Assert\Length(
         max: 255,
-        maxMessage: 'Le nom du lieu est trop long !'
+        maxMessage: 'Location name is too long'
     )]
     private ?string $lieu = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Assert\NotBlank(message: 'Le nom de la catégorie doit etre remplie')]
-
+    #[Assert\NotBlank(message: 'Category name is required')]
     #[Assert\Length(
         max: 50,
-        maxMessage: 'Le nom de la catégorie est obligatoire ! '
+        maxMessage: 'Category name is too long'
     )]
     private ?string $categorie = null;
 
     #[ORM\Column(nullable: true)]
-
-    #[Assert\NotBlank(message: 'id est un champs obligatoire')]
+    #[Assert\NotBlank(message: 'ID is a required field')]
     private ?string $id_client = null;
 
     #[ORM\Column(type: 'datetime')]
-
-    #[Assert\NotBlank(message: 'Spécifier la date de votre expérience !')]
+    #[Assert\NotBlank(message: 'Please specify the date of your experience')]
     #[Assert\Type(
         type: "\DateTimeInterface",
-        message: 'La date n\'est pas dans un format valide'
+        message: 'Date is not in a valid format'
     )]
     private ?\DateTimeInterface $date = null;
     
-    #[Assert\NotBlank(message: 'N\'oubliez pas de spécifier la date de votre expérience !')]
-
+    #[Assert\NotBlank(message: 'Please specify the date of your experience')]
     #[ORM\Column(name: 'date_creation', type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $dateCreation = null;
 
+    #[ORM\Column(type: 'json', nullable: true)]
+    private $airQualityData = [];
 
     #[ORM\OneToMany(mappedBy: 'experience', targetEntity: Commentaire::class, orphanRemoval: true)]
     private Collection $commentaires;
@@ -138,7 +134,7 @@ class Experience
         return $this->url;
     }
 
-    public function setUrl(string $url): static
+    public function setUrl(?string $url): static
     {
         $this->url = $url;
 
@@ -150,7 +146,7 @@ class Experience
         return $this->lieu;
     }
 
-    public function setLieu(string $lieu): static
+    public function setLieu(?string $lieu): static
     {
         $this->lieu = $lieu;
 
@@ -162,7 +158,7 @@ class Experience
         return $this->categorie;
     }
 
-    public function setCategorie(string $categorie): static
+    public function setCategorie(?string $categorie): static
     {
         $this->categorie = $categorie;
 
@@ -201,6 +197,17 @@ class Experience
     public function setDateCreation(\DateTimeInterface $dateCreation): self
     {
         $this->dateCreation = $dateCreation;
+        return $this;
+    }
+
+    public function getAirQualityData(): ?array
+    {
+        return $this->airQualityData;
+    }
+
+    public function setAirQualityData(?array $airQualityData): self
+    {
+        $this->airQualityData = $airQualityData;
         return $this;
     }
 
@@ -247,6 +254,7 @@ class Experience
             $this->ratings->add($rating);
             $rating->setExperience($this);
         }
+
         return $this;
     }
 
@@ -257,6 +265,7 @@ class Experience
                 $rating->setExperience(null);
             }
         }
+
         return $this;
     }
 

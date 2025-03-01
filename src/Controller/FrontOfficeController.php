@@ -28,7 +28,7 @@ class FrontOfficeController extends AbstractController
             $entityManager->persist($experience);
             $entityManager->flush();
 
-            $this->addFlash('success', 'Votre expérience a été partagée avec succès !');
+            $this->addFlash('success', 'Your experience has been shared successfully!');
             return $this->redirectToRoute('app_front_office');
         }
 

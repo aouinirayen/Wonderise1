@@ -6,10 +6,13 @@ use App\Entity\Experience;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\UrlType;
-
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Url;
 
 class ExperienceType extends AbstractType
 {
@@ -18,25 +21,68 @@ class ExperienceType extends AbstractType
         $builder
             ->add('titre', TextType::class, [
                 'label' => 'Title',
-                'attr' => ['class' => 'form-control']
+                'required' => true,
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'Please enter a title',
+                    ]),
+                    new Length([
+                        'min' => 10,
+                        'minMessage' => 'Your title should be at least {{ limit }} characters',
+                        'max' => 255,
+                    ]),
+                ],
+                'attr' => [
+                    'class' => 'form-control',
+                    'placeholder' => 'Enter the title of your experience'
+                ]
             ])
-            ->add('description', TextType::class, [
+            ->add('description', TextareaType::class, [
                 'label' => 'Description',
-                'attr' => ['class' => 'form-control']
+                'required' => true,
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'Please enter a description',
+                    ]),
+                    new Length([
+                        'min' => 10,
+                        'minMessage' => 'Your description should be at least {{ limit }} characters',
+                    ]),
+                ],
+                'attr' => [
+                    'class' => 'form-control',
+                    'rows' => 5,
+                    'placeholder' => 'Describe your experience'
+                ]
             ])
             ->add('url', UrlType::class, [
                 'label' => 'Image URL',
-                'attr' => ['class' => 'form-control']
+                'required' => false,
+                'constraints' => [
+                    new Url([
+                        'message' => 'Please enter a valid URL',
+                    ]),
+                ],
+                'attr' => [
+                    'class' => 'form-control',
+                    'placeholder' => 'Enter the URL of an image'
+                ]
             ])
             ->add('lieu', TextType::class, [
+                'label' => 'Location',
                 'required' => false,
-                'label' => 'Place',
-                'attr' => ['class' => 'form-control']
+                'attr' => [
+                    'class' => 'form-control',
+                    'placeholder' => 'Where did this experience take place?'
+                ]
             ])
             ->add('categorie', TextType::class, [
-                'required' => false,
                 'label' => 'Category',
-                'attr' => ['class' => 'form-control']
+                'required' => false,
+                'attr' => [
+                    'class' => 'form-control',
+                    'placeholder' => 'What category best describes your experience?'
+                ]
             ])
             ->add('id_client', TextType::class, [
                 'required' => false,
@@ -60,6 +106,7 @@ class ExperienceType extends AbstractType
             'attr' => [
                 'novalidate' => 'novalidate',
             ],
+            'csrf_protection' => true,
             'validation_groups' => ['Default'],
         ]);
     }

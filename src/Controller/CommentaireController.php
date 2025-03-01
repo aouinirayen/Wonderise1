@@ -30,7 +30,10 @@ class CommentaireController extends AbstractController
     {
         $submittedToken = $request->request->get('_token');
         if (!$this->isCsrfTokenValid('edit'.$commentaire->getId(), $submittedToken)) {
-            throw $this->createAccessDeniedException('Token CSRF invalide');
+            $this->addFlash('error', 'Invalid CSRF token');
+            return $this->redirectToRoute('app_experience_show', [
+                'id' => $commentaire->getExperience()->getId()
+            ]);
         }
 
         $contenu = $request->request->get('contenu');
@@ -39,7 +42,7 @@ class CommentaireController extends AbstractController
             $commentaire->setDateModification(new \DateTime());
             
             $entityManager->flush();
-            $this->addFlash('success', 'Commentaire modifié avec succès !');
+            $this->addFlash('success', 'Comment modified successfully!');
         }
 
         return $this->redirectToRoute('app_experience_show', [
@@ -52,7 +55,7 @@ class CommentaireController extends AbstractController
     {
         $submittedToken = $request->request->get('_token');
         if (!$this->isCsrfTokenValid('delete'.$commentaire->getId(), $submittedToken)) {
-            throw $this->createAccessDeniedException('Token CSRF invalide');
+            throw $this->createAccessDeniedException('Invalid CSRF token');
         }
 
         $experienceId = $commentaire->getExperience()->getId();
@@ -60,7 +63,7 @@ class CommentaireController extends AbstractController
         $entityManager->remove($commentaire);
         $entityManager->flush();
 
-        $this->addFlash('success', 'Commentaire supprimé avec succès !');
+        $this->addFlash('success', 'Comment deleted successfully!');
 
         return $this->redirectToRoute('app_experience_show', ['id' => $experienceId]);
     }
@@ -88,13 +91,13 @@ class CommentaireController extends AbstractController
             
             // Ajouter un message d'avertissement si nécessaire
             if ($sentiment['sentiment'] === 'négatif') {
-                $this->addFlash('warning', 'Votre commentaire semble négatif. Merci de rester constructif.');
+                $this->addFlash('warning', 'Your comment appears to be negative. Please keep it constructive.');
             }
 
             $entityManager->persist($commentaire);
             $entityManager->flush();
 
-            $this->addFlash('success', 'Votre commentaire a été ajouté avec succès !');
+            $this->addFlash('success', 'Your comment has been added successfully!');
             return $this->redirectToRoute('app_experience_show', ['id' => $experience->getId()]);
         }
 

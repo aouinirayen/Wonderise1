@@ -18,18 +18,18 @@ class CommentaireType extends AbstractType
     {
         $builder
             ->add('auteur', TextType::class, [
-                'label' => 'Votre nom',
+                'label' => 'Your Name',
                 'attr' => ['class' => 'form-control']
             ])
             ->add('contenu', TextareaType::class, [
-                'label' => 'Votre commentaire',
+                'label' => 'Your Comment',
                 'attr' => [
                     'class' => 'form-control',
                     'rows' => 4
                 ]
             ])
             ->add('submit', SubmitType::class, [
-                'label' => 'Envoyer',
+                'label' => 'Submit',
                 'attr' => ['class' => 'btn btn-primary']
             ]);
     }

@@ -19,22 +19,22 @@ class Commentaire
     private ?int $id = null;
 
     #[ORM\Column(type: "text")]
-    #[Assert\NotBlank(message: "Le commentaire ne peut pas être vide")]
+    #[Assert\NotBlank(message: "Comment cannot be empty")]
     #[Assert\Length(
         min: 5,
         max: 1000,
-        minMessage: "Le commentaire doit faire au moins 5 caractères",
-        maxMessage: "Le commentaire ne peut pas dépasser 1000 caractères"
+        minMessage: "Comment must be at least 5 characters long",
+        maxMessage: "Comment cannot exceed 1000 characters"
     )]
     private ?string $contenu = null;
 
     #[ORM\Column(type: "string", length: 255)]
-    #[Assert\NotBlank(message: "Le nom de l'auteur ne peut pas être vide")]
+    #[Assert\NotBlank(message: "Author name cannot be empty")]
     #[Assert\Length(
         min: 2,
         max: 50,
-        minMessage: "Le nom doit faire au moins 2 caractères",
-        maxMessage: "Le nom ne peut pas dépasser 50 caractères"
+        minMessage: "Name must be at least 2 characters long",
+        maxMessage: "Name cannot exceed 50 characters"
     )]
     private ?string $auteur = null;
 

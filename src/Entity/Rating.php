@@ -22,6 +22,10 @@ class Rating
     )]
     private ?float $value = null;
 
+    #[ORM\Column(length: 20)]
+    #[Assert\Choice(choices: ['like', 'dislike', 'rating'], message: 'Invalid rating type')]
+    private ?string $type = 'rating';
+
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
@@ -50,6 +54,17 @@ class Rating
     public function setValue(float $value): static
     {
         $this->value = $value;
+        return $this;
+    }
+
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+
+    public function setType(string $type): static
+    {
+        $this->type = $type;
         return $this;
     }
 
