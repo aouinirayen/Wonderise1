@@ -38,15 +38,11 @@
         }
         .sortable {
             cursor: pointer;
-            user-select: none;
         }
-        .sortable i {
-            margin-left: 5px;
-        }
-        .sortable.asc i {
+        th.asc .fa-sort-up {
             color: #0d6efd;
         }
-        .sortable.desc i {
+        th.desc .fa-sort-down {
             color: #0d6efd;
         }
         .filter-section {
@@ -141,7 +137,7 @@
 {% block javascripts %}
     {{ parent() }}
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script type="text/javascript">
+    <script>
         google.charts.load('current', {'packages':['corechart']});
         google.charts.setOnLoadCallback(drawCharts);
 
@@ -228,194 +224,108 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            const searchInput = document.querySelector('input[type="text"]');
-            const tableBody = document.querySelector('tbody');
+            const searchInput = document.querySelector('.search-input');
+            const maxPriceInput = document.querySelector('input[placeholder="Filtrer par prix maximum"]');
+            const minPlacesInput = document.querySelector('input[placeholder="Filtrer par places minimum"]');
+            const tbody = document.querySelector('tbody');
             let timeout = null;
 
-            searchInput.addEventListener('input', function(e) {
+            function getStatusBadge(placesDisponibles) {
+                if (placesDisponibles <= 0) {
+                    return '<span class="badge bg-danger">Complet</span>';
+                } else if (placesDisponibles < 5) {
+                    return '<span class="badge bg-warning">Places limitées</span>';
+                } else {
+                    return '<span class="badge bg-success">Disponible</span>';
+                }
+            }
+
+            function performSearch() {
+                const searchValue = searchInput.value.trim().toLowerCase();
+                const maxPrice = maxPriceInput.value;
+                const minPlaces = minPlacesInput.value;
+
+                // Get all rows
+                const rows = Array.from(document.querySelectorAll('#offreTable tbody tr'));
+                
+                rows.forEach(row => {
+                    const title = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                    const price = parseFloat(row.querySelector('td:nth-child(3)').textContent);
+                    const places = parseInt(row.querySelector('td:nth-child(4)').textContent);
+                    
+                    const matchesSearch = !searchValue || title.includes(searchValue);
+                    const matchesPrice = !maxPrice || price <= parseFloat(maxPrice);
+                    const matchesPlaces = !minPlaces || places >= parseInt(minPlaces);
+                    
+                    row.style.display = matchesSearch && matchesPrice && matchesPlaces ? '' : 'none';
+                });
+            }
+
+            // Debounce search
+            function debounceSearch() {
                 clearTimeout(timeout);
-                timeout = setTimeout(() => {
-                    const query = e.target.value;
-                    
-                    fetch(`/admin/offre/search?q=${encodeURIComponent(query)}`)
-                        .then(response => response.json())
-                        .then(offres => {
-                            tableBody.innerHTML = '';
-                            offres.forEach(offre => {
-                                tableBody.innerHTML += `
-                                    <tr>
-                                        <td>
-                                            <img src="/uploads/images/${offre.image}" alt="${offre.titre}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
-                                        </td>
-                                        <td>
-                                            ${offre.titre}
-                                            <br>
-                                            <small class="text-muted">${offre.description.slice(0, 50)}...</small>
-                                        </td>
-                                        <td>${offre.prix}€</td>
-                                        <td>
-                                            ${offre.placesDisponibles} places
-                                            <br>
-                                            <small class="text-muted">disponibles</small>
-                                        </td>
-                                        <td><span class="badge bg-success">Disponible</span></td>
-                                        <td>
-                                            <div class="btn-group">
-                                                <a href="/admin/offre/${offre.id}" class="btn btn-sm btn-info">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                                <a href="/admin/offre/${offre.id}/edit" class="btn btn-sm btn-warning">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                <a href="#" class="btn btn-sm btn-danger">
-                                                    <i class="fas fa-trash"></i>
-                                                </a>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                `;
-                            });
-                            // Mettre à jour les graphiques
-                            drawColumnChart();
-                            drawPieChart();
-                        });
-                }, 300);
-            });
-        });
-
-        const table = document.getElementById('offreTable');
-        const headers = table.querySelectorAll('th.sortable');
-        
-        headers.forEach(header => {
-            header.addEventListener('click', () => {
-                const column = header.dataset.sort;
-                const rows = Array.from(table.querySelectorAll('tbody tr'));
-                const currentDirection = header.classList.contains('asc') ? 'desc' : 'asc';
-                
-                // Réinitialiser les classes de tri sur tous les en-têtes
-                headers.forEach(h => {
-                    h.classList.remove('asc', 'desc');
-                    h.querySelector('i').className = 'fas fa-sort';
-                });
-                
-                // Mettre à jour l'icône et la classe de l'en-tête cliqué
-                header.classList.add(currentDirection);
-                header.querySelector('i').className = `fas fa-sort-${currentDirection}`;
-                
-                // Trier les lignes
-                rows.sort((a, b) => {
-                    let aValue, bValue;
-                    
-                    switch(column) {
-                        case 'titre':
-                            aValue = a.querySelector('h6').textContent;
-                            bValue = b.querySelector('h6').textContent;
-                            break;
-                        case 'prix':
-                            aValue = parseFloat(a.cells[2].textContent);
-                            bValue = parseFloat(b.cells[2].textContent);
-                            break;
-                        case 'places':
-                            aValue = parseInt(a.cells[3].textContent);
-                            bValue = parseInt(b.cells[3].textContent);
-                            break;
-                        case 'statut':
-                            aValue = a.cells[4].textContent;
-                            bValue = b.cells[4].textContent;
-                            break;
-                    }
-                    
-                    if (currentDirection === 'asc') {
-                        return aValue > bValue ? 1 : -1;
-                    } else {
-                        return aValue < bValue ? 1 : -1;
-                    }
-                });
-                
-                // Réorganiser les lignes dans le tableau
-                const tbody = table.querySelector('tbody');
-                rows.forEach(row => tbody.appendChild(row));
-            });
-        });
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const table = document.getElementById('offreTable');
-            const tbody = table.querySelector('tbody');
-            const rows = Array.from(tbody.querySelectorAll('tr'));
-            
-            function filterRows() {
-                const searchText = document.getElementById('searchFilter').value.toLowerCase();
-                const prixMax = parseFloat(document.getElementById('prixMax').value) || Infinity;
-                const placesMin = parseInt(document.getElementById('placesMin').value) || 0;
-                const statut = document.getElementById('statutFilter').value.toLowerCase();
-                
-                rows.forEach(row => {
-                    const titre = row.querySelector('h6').textContent.toLowerCase();
-                    const description = row.querySelector('.text-muted').textContent.toLowerCase();
-                    const prix = parseFloat(row.cells[2].textContent);
-                    const places = parseInt(row.cells[3].textContent);
-                    const rowStatut = row.cells[4].textContent.toLowerCase();
-                    
-                    const matchesSearch = titre.includes(searchText) || description.includes(searchText);
-                    const matchesPrix = prix <= prixMax;
-                    const matchesPlaces = places >= placesMin;
-                    const matchesStatut = !statut || rowStatut.includes(statut);
-                    
-                    row.style.display = 
-                        matchesSearch && matchesPrix && matchesPlaces && matchesStatut
-                        ? ''
-                        : 'none';
-                });
+                timeout = setTimeout(performSearch, 300);
             }
+
+            // Add event listeners
+            searchInput.addEventListener('input', debounceSearch);
+            maxPriceInput.addEventListener('input', debounceSearch);
+            minPlacesInput.addEventListener('input', debounceSearch);
+
+            const tableHeaders = document.querySelectorAll('#offreTable thead th');
             
-            // Événements pour les filtres
-            ['searchFilter', 'prixMax', 'placesMin', 'statutFilter'].forEach(id => {
-                document.getElementById(id).addEventListener('input', filterRows);
-            });
-        });
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const table = document.getElementById('offreTable');
-            const tbody = table.querySelector('tbody');
-            const rows = Array.from(tbody.querySelectorAll('tr'));
-            
-            function filterRows() {
-                const searchText = document.getElementById('searchFilter').value.toLowerCase();
-                const prixMax = parseFloat(document.getElementById('prixMax').value) || Infinity;
-                const placesMin = parseInt(document.getElementById('placesMin').value) || 0;
-                const statut = document.getElementById('statutFilter').value.toLowerCase();
+            tableHeaders.forEach((header, index) => {
+                // Skip image and actions columns
+                if (index === 0 || index === 5) return;
                 
-                rows.forEach(row => {
-                    const titre = row.querySelector('h6').textContent.toLowerCase();
-                    const description = row.querySelector('.text-muted').textContent.toLowerCase();
-                    const prix = parseFloat(row.cells[2].textContent);
-                    const places = parseInt(row.cells[3].textContent);
-                    const rowStatut = row.cells[4].textContent.toLowerCase();
+                // Add sort cursor and icon
+                header.style.cursor = 'pointer';
+                header.innerHTML += ' <i class="fas fa-sort"></i>';
+                
+                header.addEventListener('click', function() {
+                    const table = document.querySelector('#offreTable');
+                    const tbody = table.querySelector('tbody');
+                    const rows = Array.from(tbody.getElementsByTagName('tr'));
                     
-                    const matchesSearch = titre.includes(searchText) || description.includes(searchText);
-                    const matchesPrix = prix <= prixMax;
-                    const matchesPlaces = places >= placesMin;
-                    const matchesStatut = !statut || rowStatut.includes(statut);
+                    // Get current sort direction
+                    const isAscending = header.classList.contains('asc');
                     
-                    row.style.display = 
-                        matchesSearch && matchesPrix && matchesPlaces && matchesStatut
-                        ? ''
-                        : 'none';
+                    // Reset all headers
+                    tableHeaders.forEach(th => {
+                        th.classList.remove('asc', 'desc');
+                        const icon = th.querySelector('i');
+                        if (icon) icon.className = 'fas fa-sort';
+                    });
+                    
+                    // Set new sort direction
+                    header.classList.add(isAscending ? 'desc' : 'asc');
+                    const icon = header.querySelector('i');
+                    icon.className = `fas fa-sort-${isAscending ? 'down' : 'up'}`;
+                    
+                    // Sort rows
+                    rows.sort((a, b) => {
+                        let aValue = a.cells[index].textContent.trim();
+                        let bValue = b.cells[index].textContent.trim();
+                        
+                        // Handle numeric values
+                        if (index === 2) { // Prix
+                            aValue = parseFloat(aValue.replace('€', ''));
+                            bValue = parseFloat(bValue.replace('€', ''));
+                        } else if (index === 3) { // Places
+                            aValue = parseInt(aValue);
+                            bValue = parseInt(bValue);
+                        }
+                        
+                        if (isAscending) {
+                            return aValue < bValue ? 1 : -1;
+                        } else {
+                            return aValue > bValue ? 1 : -1;
+                        }
+                    });
+                    
+                    // Reorder rows
+                    rows.forEach(row => tbody.appendChild(row));
                 });
-            }
-            
-            // Événements pour les filtres en temps réel
-            const filterInputs = [
-                'searchFilter',
-                'prixMax',
-                'placesMin',
-                'statutFilter'
-            ];
-            
-            filterInputs.forEach(id => {
-                document.getElementById(id).addEventListener('input', filterRows);
-                document.getElementById(id).addEventListener('change', filterRows);
             });
         });
     </script>
@@ -423,47 +333,34 @@
 
 {% block content %}
     <div class="container-fluid">
+        <meta name="csrf-token" content="{{ csrf_token('delete') }}">
         <h1 class="page-title">Liste des Offres</h1>
         
+        <!-- Filters Section -->
+        <div class="filter-section">
+            <div class="filter-group">
+                <div class="filter-item search-box">
+                    <label class="filter-label">Rechercher</label>
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="filter-input search-input" placeholder="Rechercher une offre...">
+                </div>
+                <div class="filter-item">
+                    <label class="filter-label">Prix Maximum</label>
+                    <input type="number" class="filter-input" placeholder="Filtrer par prix maximum">
+                </div>
+                <div class="filter-item">
+                    <label class="filter-label">Places Minimum</label>
+                    <input type="number" class="filter-input" placeholder="Filtrer par places minimum">
+                </div>
+            </div>
+        </div>
+
         <!-- Action Buttons -->
         <div class="row mb-3">
             <div class="col-12">
                 <a href="{{ path('admin_offre_new') }}" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Nouvelle Offre
                 </a>
-            </div>
-        </div>
-
-        <!-- Section Filtres -->
-        <div class="filter-section">
-            <div class="filter-group">
-                <div class="filter-item search-box">
-                    <label class="filter-label">Recherche</label>
-                    <i class="fas fa-search search-icon"></i>
-                    <input type="text" class="filter-input search-input" id="searchFilter" placeholder="Rechercher une offre...">
-                </div>
-                <div class="filter-item">
-                    <label class="filter-label">Prix maximum</label>
-                    <div style="position: relative;">
-                        <input type="number" class="filter-input" id="prixMax" placeholder="Filtrer par prix..." min="0">
-                        <i class="fas fa-euro-sign filter-icon"></i>
-                    </div>
-                </div>
-                <div class="filter-item">
-                    <label class="filter-label">Places disponibles minimum</label>
-                    <div style="position: relative;">
-                        <input type="number" class="filter-input" id="placesMin" placeholder="Filtrer par places..." min="0">
-                        <i class="fas fa-users filter-icon"></i>
-                    </div>
-                </div>
-                <div class="filter-item">
-                    <label class="filter-label">Statut</label>
-                    <select class="filter-select" id="statutFilter">
-                        <option value="">Tous les statuts</option>
-                        <option value="disponible">Disponible</option>
-                        <option value="indisponible">Indisponible</option>
-                    </select>
-                </div>
             </div>
         </div>
 
@@ -474,43 +371,47 @@
                     <table id="offreTable" class="table table-striped">
                         <thead>
                             <tr>
-                                <th>IMAGE</th>
-                                <th class="sortable" data-sort="titre">TITRE <i class="fas fa-sort"></i></th>
-                                <th class="sortable" data-sort="prix">PRIX <i class="fas fa-sort"></i></th>
-                                <th class="sortable" data-sort="places">PLACES DISPONIBLES <i class="fas fa-sort"></i></th>
-                                <th class="sortable" data-sort="statut">STATUT <i class="fas fa-sort"></i></th>
-                                <th>ACTIONS</th>
+                                <th>Image</th>
+                                <th>Titre</th>
+                                <th>Prix</th>
+                                <th>Places disponibles</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for offre in offres %}
                                 <tr>
-                                    <td>
-                                        <img src="{{ asset('uploads/images/' ~ offre.image) }}" alt="{{ offre.titre }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
+                                    <td class="align-middle">
+                                        <img src="{{ asset('uploads/images/' ~ offre.image) }}" alt="{{ offre.titre }}" class="img-fluid" style="max-width: 100px;">
                                     </td>
-                                    <td>
-                                        {{ offre.titre }}
-                                        <br>
-                                        <small class="text-muted">{{ offre.description|slice(0, 50) }}...</small>
+                                    <td class="align-middle">{{ offre.titre }}</td>
+                                    <td class="align-middle">{{ offre.prix }}€</td>
+                                    <td class="align-middle">{{ offre.placesDisponibles }} places disponibles</td>
+                                    <td class="align-middle">
+                                        {% if offre.placesDisponibles <= 0 %}
+                                            <span class="badge bg-danger">Complet</span>
+                                        {% elseif offre.placesDisponibles < 5 %}
+                                            <span class="badge bg-warning">Places limitées</span>
+                                        {% else %}
+                                            <span class="badge bg-success">Disponible</span>
+                                        {% endif %}
                                     </td>
-                                    <td>{{ offre.prix }}€</td>
-                                    <td>
-                                        {{ offre.placesDisponibles }} places
-                                        <br>
-                                        <small class="text-muted">disponibles</small>
-                                    </td>
-                                    <td><span class="badge bg-success">Disponible</span></td>
-                                    <td>
+                                    <td class="align-middle">
                                         <div class="btn-group">
-                                            <a href="{{ path('admin_offre_show', {'id': offre.id}) }}" class="btn btn-sm btn-info">
+                                            <a href="{{ path('admin_offre_show', {'id': offre.id}) }}" class="btn btn-info btn-sm">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <a href="{{ path('admin_offre_edit', {'id': offre.id}) }}" class="btn btn-sm btn-warning">
+                                            <a href="{{ path('admin_offre_edit', {'id': offre.id}) }}" class="btn btn-warning btn-sm">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            <a href="#" class="btn btn-sm btn-danger">
-                                                <i class="fas fa-trash"></i>
-                                            </a>
+                                            <form method="post" action="{{ path('admin_offre_delete', {'id': offre.id}) }}" style="display: inline-block;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette offre ?');">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ offre.id) }}">
+                                                <input type="hidden" name="_method" value="DELETE">
+                                                <button class="btn btn-danger btn-sm">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
                                         </div>
                                     </td>
                                 </tr>

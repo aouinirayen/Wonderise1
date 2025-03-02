@@ -15,10 +15,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Psr\Log\LoggerInterface;
 use App\Service\StripeService;
-<<<<<<< HEAD
-=======
 use App\Service\EmailService;
->>>>>>> 4f07741 (”Init”)
 use Knp\Bundle\SnappyBundle\Snappy\Response\PdfResponse;
 use Knp\Snappy\Pdf;
 
@@ -29,30 +26,20 @@ class ReservationController extends AbstractController
     private $stripeService;
     private $logger;
     private $offreRepository;
-<<<<<<< HEAD
-=======
     private $emailService;
->>>>>>> 4f07741 (”Init”)
 
     public function __construct(
         EntityManagerInterface $entityManager,
         StripeService $stripeService,
         LoggerInterface $logger,
-<<<<<<< HEAD
-        OffreRepository $offreRepository
-=======
         OffreRepository $offreRepository,
         EmailService $emailService
->>>>>>> 4f07741 (”Init”)
     ) {
         $this->entityManager = $entityManager;
         $this->stripeService = $stripeService;
         $this->logger = $logger;
         $this->offreRepository = $offreRepository;
-<<<<<<< HEAD
-=======
         $this->emailService = $emailService;
->>>>>>> 4f07741 (”Init”)
     }
 
     #[Route('/', name: 'app_reservation_index', methods: ['GET'])]
@@ -247,18 +234,6 @@ class ReservationController extends AbstractController
         }
     }
 
-<<<<<<< HEAD
-    #[Route('/{id}/confirmation', name: 'app_reservation_confirmation', methods: ['GET'])]
-    public function confirmation(Reservation $reservation): Response
-    {
-        // Vérifier si la réservation a bien été payée
-        if ($reservation->getStatut() !== 'payé') {
-            return $this->redirectToRoute('app_reservation_payment', ['id' => $reservation->getId()]);
-        }
-
-        return $this->render('FrontOffice/Reservation/confirmation.html.twig', [
-            'reservation' => $reservation
-=======
     #[Route('/{id}/confirmation', name: 'app_reservation_confirmation')]
     public function confirmation(Reservation $reservation): Response
     {
@@ -273,11 +248,10 @@ class ReservationController extends AbstractController
 
         return $this->render('FrontOffice/Reservation/confirmation.html.twig', [
             'reservation' => $reservation,
->>>>>>> 4f07741 (”Init”)
         ]);
     }
 
-    #[Route('/admin/reservation', name: 'app_admin_reservation_index', methods: ['GET'])]
+    #[Route('/admin/reservation', name: 'admin_reservation_index', methods: ['GET'])]
     public function adminIndex(ReservationRepository $reservationRepository): Response
     {
         $reservations = $reservationRepository->findAll();
@@ -286,9 +260,17 @@ class ReservationController extends AbstractController
             return $total + $reservation->getNombrePersonne();
         }, 0);
 
+        // Get unique offers
+        $uniqueOffres = [];
+        foreach ($reservations as $reservation) {
+            $offre = $reservation->getOffre();
+            $uniqueOffres[$offre->getId()] = $offre;
+        }
+        
         return $this->render('BackOffice/Reservation/index.html.twig', [
             'reservations' => $reservations,
-            'total_personnes' => $totalPersonnes
+            'total_personnes' => $totalPersonnes,
+            'uniqueOffres' => array_values($uniqueOffres)
         ]);
     }
 
@@ -339,8 +321,6 @@ class ReservationController extends AbstractController
             'facture_' . $reservation->getId() . '.pdf'
         );
     }
-<<<<<<< HEAD
-=======
 
     #[Route('/admin/reservation/search', name: 'admin_reservation_search')]
     public function search(Request $request, ReservationRepository $reservationRepository): JsonResponse
@@ -376,5 +356,31 @@ class ReservationController extends AbstractController
 
         return new JsonResponse($results);
     }
->>>>>>> 4f07741 (”Init”)
+
+    #[Route('/search', name: 'admin_reservation_search', methods: ['GET'])]
+    public function searchReservation(Request $request, ReservationRepository $reservationRepository): JsonResponse
+    {
+        $search = $request->query->get('search');
+        $reservations = $reservationRepository->searchReservations($search);
+
+        $results = [];
+        foreach ($reservations as $reservation) {
+            $results[] = [
+                'id' => $reservation->getId(),
+                'client' => [
+                    'nom' => $reservation->getClient()->getNom(),
+                    'email' => $reservation->getClient()->getEmail()
+                ],
+                'offre' => [
+                    'titre' => $reservation->getOffre()->getTitre(),
+                    'prix' => $reservation->getOffre()->getPrix() . '€ par personne'
+                ],
+                'date_depart' => $reservation->getDateDepart() ? $reservation->getDateDepart()->format('Y-m-d') : 'Non définie',
+                'personnes' => $reservation->getPersonnes(),
+                'contact' => $reservation->getContact()
+            ];
+        }
+
+        return new JsonResponse($results);
+    }
 }

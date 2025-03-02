@@ -10,18 +10,12 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-<<<<<<< HEAD
-=======
 use Symfony\Component\HttpFoundation\JsonResponse;
->>>>>>> 4f07741 (”Init”)
 use Symfony\Component\Routing\Attribute\Route;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Psr\Log\LoggerInterface;
-<<<<<<< HEAD
-=======
 use App\Repository\OffreRepository;
->>>>>>> 4f07741 (”Init”)
 
 final class OffreController extends AbstractController
 {
@@ -177,11 +171,7 @@ final class OffreController extends AbstractController
 
                     $offrePhoto = new OffrePhoto();
                     $offrePhoto->setOffre($offre);
-<<<<<<< HEAD
-                    $offrePhoto->setImage($newFilename);
-=======
                     $offrePhoto->setFilename($newFilename);
->>>>>>> 4f07741 (”Init”)
                     $entityManager->persist($offrePhoto);
                 } catch (FileException $e) {
                     $this->addFlash('error', 'Une erreur est survenue lors de l\'upload d\'une photo additionnelle');
@@ -249,11 +239,7 @@ final class OffreController extends AbstractController
 
                     $offrePhoto = new OffrePhoto();
                     $offrePhoto->setOffre($offre);
-<<<<<<< HEAD
-                    $offrePhoto->setImage($newFilename);
-=======
                     $offrePhoto->setFilename($newFilename);
->>>>>>> 4f07741 (”Init”)
                     $entityManager->persist($offrePhoto);
                 } catch (FileException $e) {
                     $this->addFlash('error', 'Une erreur est survenue lors de l\'upload d\'une photo additionnelle');
@@ -285,11 +271,7 @@ final class OffreController extends AbstractController
 
             // Supprimer les photos additionnelles
             foreach ($offre->getPhotos() as $photo) {
-<<<<<<< HEAD
-                $photoPath = $this->getParameter('images_directory').'/'.$photo->getImage();
-=======
                 $photoPath = $this->getParameter('images_directory').'/'.$photo->getFilename();
->>>>>>> 4f07741 (”Init”)
                 if (file_exists($photoPath)) {
                     unlink($photoPath);
                 }
@@ -301,30 +283,24 @@ final class OffreController extends AbstractController
 
         return $this->redirectToRoute('admin_offre_index');
     }
-<<<<<<< HEAD
-=======
 
-    #[Route('/admin/offre-search', name: 'admin_offre_search')]
+    #[Route('/admin/offre/search', name: 'admin_offre_search', methods: ['GET'])]
     public function search(Request $request, OffreRepository $offreRepository): JsonResponse
     {
-        $query = $request->query->get('q');
-        
-        $offres = $offreRepository->createQueryBuilder('o')
-            ->where('o.titre LIKE :query')
-            ->orWhere('o.description LIKE :query')
-            ->setParameter('query', '%'.$query.'%')
-            ->getQuery()
-            ->getResult();
+        $search = $request->query->get('search');
+        $maxPrice = $request->query->get('maxPrice') ? (float)$request->query->get('maxPrice') : null;
+        $minPlaces = $request->query->get('minPlaces') ? (int)$request->query->get('minPlaces') : null;
+
+        $offres = $offreRepository->searchOffres($search, $maxPrice, $minPlaces);
 
         $results = [];
         foreach ($offres as $offre) {
             $results[] = [
                 'id' => $offre->getId(),
                 'titre' => $offre->getTitre(),
-                'description' => $offre->getDescription(),
                 'prix' => $offre->getPrix(),
                 'placesDisponibles' => $offre->getPlacesDisponibles(),
-                'image' => $offre->getImage(),
+                'image' => $offre->getImage()
             ];
         }
 
@@ -391,5 +367,4 @@ final class OffreController extends AbstractController
         // Pour l'instant, on renvoie juste un succès
         return new JsonResponse(['success' => true, 'rating' => $rating]);
     }
->>>>>>> 4f07741 (”Init”)
 }

@@ -40,4 +40,19 @@ class ReservationRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+    public function searchReservations(?string $search): array
+    {
+        $qb = $this->createQueryBuilder('r')
+            ->leftJoin('r.client', 'c')
+            ->leftJoin('r.offre', 'o');
+
+        if ($search) {
+            $qb->andWhere('c.nom LIKE :search OR c.email LIKE :search OR o.titre LIKE :search OR r.id = :id')
+                ->setParameter('search', '%' . $search . '%')
+                ->setParameter('id', is_numeric($search) ? $search : -1);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
 }

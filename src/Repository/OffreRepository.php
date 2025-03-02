@@ -40,4 +40,26 @@ class OffreRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+    public function searchOffres(?string $search = null, ?float $maxPrice = null, ?int $minPlaces = null): array
+    {
+        $qb = $this->createQueryBuilder('o');
+
+        if ($search) {
+            $qb->andWhere('o.titre LIKE :search')
+               ->setParameter('search', '%' . $search . '%');
+        }
+
+        if ($maxPrice) {
+            $qb->andWhere('o.prix <= :maxPrice')
+               ->setParameter('maxPrice', $maxPrice);
+        }
+
+        if ($minPlaces) {
+            $qb->andWhere('o.placesDisponibles >= :minPlaces')
+               ->setParameter('minPlaces', $minPlaces);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
 }

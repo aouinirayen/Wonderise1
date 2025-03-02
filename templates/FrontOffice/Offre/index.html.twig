@@ -1,5 +1,7 @@
 {% extends 'FrontOffice/base.html.twig' %}
 
+{% block title %}Nos Offres{% endblock %}
+
 {% block stylesheets %}
     {{ parent() }}
     <style>
@@ -290,8 +292,6 @@
             font-size: 1.2rem;
             color: #495057;
             margin: 0;
-<<<<<<< HEAD
-=======
         }
 
         .search-container {
@@ -327,7 +327,6 @@
         }
         .rating-star:hover {
             color: #ffd700;
->>>>>>> 4f07741 (”Init”)
         }
 
         @media (max-width: 768px) {
@@ -355,11 +354,6 @@
     </style>
 {% endblock %}
 
-<<<<<<< HEAD
-=======
-{% block title %}Nos Offres{% endblock %}
-
->>>>>>> 4f07741 (”Init”)
 {% block body %}
     <header class="page-header">
         <h1 class="page-title">Explorez Nos Destinations</h1>
@@ -367,13 +361,10 @@
     </header>
 
     <div class="offers-container">
-<<<<<<< HEAD
-=======
         <div class="search-container">
             <input type="text" class="search-input" id="searchInput" placeholder="Rechercher une destination...">
         </div>
 
->>>>>>> 4f07741 (”Init”)
         <div class="offers-grid" id="offersGrid">
             {% include 'FrontOffice/Offre/_offers_list.html.twig' with {'offres': offres} %}
         </div>

@@ -4,12 +4,8 @@ namespace App\Form;
 
 use App\Entity\Offre;
 use Symfony\Component\Form\AbstractType;
-<<<<<<< HEAD
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
-=======
 use Symfony\Component\Form\Extension\Core\Type\DateType;
-
->>>>>>> 4f07741 (”Init”)
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
@@ -19,10 +15,6 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Validator\Constraints\NotBlank;
-<<<<<<< HEAD
-=======
-use Symfony\Component\Form\Extension\Core\Type\CollectionType;
->>>>>>> 4f07741 (”Init”)
 
 class OffreType extends AbstractType
 {
@@ -45,10 +37,10 @@ class OffreType extends AbstractType
                 'attr' => [
                     'rows' => 5,
                     'placeholder' => 'Décrivez votre offre en détail'
-                ]
-                ,'constraints' => [
+                ],
+                'constraints' => [
                     new NotBlank([
-                        'message' => 'Le description ne peut pas être vide. Veuillez entrer un description pour l\'offre.'
+                        'message' => 'La description ne peut pas être vide. Veuillez entrer une description pour l\'offre.'
                     ])
                 ]
             ])
@@ -58,7 +50,8 @@ class OffreType extends AbstractType
                     'placeholder' => '0.00',
                     'min' => 0,
                     'step' => '0.01'
-                ],'constraints' => [
+                ],
+                'constraints' => [
                     new NotBlank([
                         'message' => 'Le prix ne peut pas être vide. Veuillez entrer un prix pour l\'offre.'
                     ])
@@ -68,9 +61,10 @@ class OffreType extends AbstractType
                 'label' => 'Nombre de places',
                 'attr' => [
                     'min' => 1
-                ],'constraints' => [
+                ],
+                'constraints' => [
                     new NotBlank([
-                        'message' => 'Le nombrePlaces ne peut pas être vide. Veuillez entrer un nombrePlaces pour l\'offre.'
+                        'message' => 'Le nombre de places ne peut pas être vide. Veuillez entrer un nombre de places pour l\'offre.'
                     ])
                 ]
             ])
@@ -101,30 +95,11 @@ class OffreType extends AbstractType
                             'image/png',
                         ],
                         'mimeTypesMessage' => 'Veuillez uploader une image valide (JPG ou PNG)',
-<<<<<<< HEAD
-                    ])
-                ],
-            ])
-            ->add('additionalPhotos', FileType::class, [
-                'label' => 'Photos additionnelles',
-                'mapped' => false,
-                'required' => false,
-                'multiple' => true,
-                'constraints' => [
-                    new File([
-                        'maxSize' => '5M',
-                        'mimeTypes' => [
-                            'image/jpeg',
-                            'image/png',
-                        ],
-                        'mimeTypesMessage' => 'Veuillez uploader des images valides (JPG ou PNG)',
-=======
->>>>>>> 4f07741 (”Init”)
                     ])
                 ],
             ])
             ->add('additionalPhotos', CollectionType::class, [
-                'entry_type' => FileType::class, // Each entry in the collection is a FileType
+                'entry_type' => FileType::class,
                 'entry_options' => [
                     'constraints' => [
                         new File([
