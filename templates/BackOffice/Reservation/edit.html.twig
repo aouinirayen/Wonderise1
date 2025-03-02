@@ -1,0 +1,183 @@
+{% extends 'BackOffice/base.html.twig' %}
+
+{% block title %}Modifier la Réservation | Wonder Admin{% endblock %}
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .form-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .form-section {
+            margin-bottom: 2rem;
+        }
+        .form-section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e9ecef;
+        }
+        .custom-file-label {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .current-image {
+            max-width: 200px;
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+        .preview-image {
+            max-width: 200px;
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-top: 1rem;
+        }
+        .required:after {
+            content: "*";
+            color: #dc3545;
+            margin-left: 4px;
+        }
+        /* Custom error message styles */
+        .form-error {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        .form-error-list {
+            padding-left: 0;
+            list-style: none;
+        }
+        .form-error-list li {
+            margin-bottom: 0.5rem;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <div class="container-fluid">
+        <h1 class="my-4">Modifier la réservation de {{ reservation.nom }} {{ reservation.prenom }}</h1>
+        
+        {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}})  }}
+        <div class="mb-3">
+        {{ form_label(form.nom, 'nom', {'label_attr': {'class': 'required'}}) }}
+        {{ form_widget(form.nom, {'attr': {'class': 'form-control', 'placeholder': 'Entrez le nom de l\'offre'}}) }}
+        {% if form.nom.vars.errors|length > 0 %}
+            <div class="form-error">
+                <ul class="form-error-list">
+                    {% for error in form.nom.vars.errors %}
+                        <li>{{ error.message }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+        <small class="form-text text-muted">Le nom doit être clair et attractif</small>
+    </div>
+    <div class="mb-3">
+    {{ form_label(form.prenom, 'prenom', {'label_attr': {'class': 'required'}}) }}
+    {{ form_widget(form.prenom, {'attr': {'class': 'form-control', 'placeholder': 'Entrez le prenom de l\'offre'}}) }}
+    {% if form.prenom.vars.errors|length > 0 %}
+        <div class="form-error">
+            <ul class="form-error-list">
+                {% for error in form.prenom.vars.errors %}
+                    <li>{{ error.message }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+    <small class="form-text text-muted">Le prenom doit être clair et attractif</small>
+</div>
+<div class="mb-3">
+{{ form_label(form.ville, 'ville', {'label_attr': {'class': 'required'}}) }}
+{{ form_widget(form.ville, {'attr': {'class': 'form-control', 'placeholder': 'Entrez le ville de l\'offre'}}) }}
+{% if form.ville.vars.errors|length > 0 %}
+    <div class="form-error">
+        <ul class="form-error-list">
+            {% for error in form.ville.vars.errors %}
+                <li>{{ error.message }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
+<small class="form-text text-muted">Le ville doit être clair et attractif</small>
+</div>
+<div class="mb-3">
+{{ form_label(form.email, 'email', {'label_attr': {'class': 'required'}}) }}
+{{ form_widget(form.email, {'attr': {'class': 'form-control', 'placeholder': 'Entrez le email de l\'offre'}}) }}
+{% if form.email.vars.errors|length > 0 %}
+    <div class="form-error">
+        <ul class="form-error-list">
+            {% for error in form.email.vars.errors %}
+                <li>{{ error.message }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
+<small class="form-text text-muted">Le email doit être clair et attractif</small>
+</div>
+<div class="mb-3">
+{{ form_label(form.telephone, 'telephone', {'label_attr': {'class': 'required'}}) }}
+{{ form_widget(form.telephone, {'attr': {'class': 'form-control', 'placeholder': 'Entrez le telephone de l\'offre'}}) }}
+{% if form.telephone.vars.errors|length > 0 %}
+    <div class="form-error">
+        <ul class="form-error-list">
+            {% for error in form.telephone.vars.errors %}
+                <li>{{ error.message }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
+<small class="form-text text-muted">Le telephone doit être clair et attractif</small>
+</div>
+<div class="mb-3">
+{{ form_label(form.nombrePersonne, 'nombrePersonne', {'label_attr': {'class': 'required'}}) }}
+{{ form_widget(form.nombrePersonne, {'attr': {'class': 'form-control', 'placeholder': 'Entrez le nombrePersonne de l\'offre'}}) }}
+{% if form.nombrePersonne.vars.errors|length > 0 %}
+    <div class="form-error">
+        <ul class="form-error-list">
+            {% for error in form.nombrePersonne.vars.errors %}
+                <li>{{ error.message }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
+<small class="form-text text-muted">Le nombrePersonne doit être clair et attractif</small>
+</div>
+<div class="mb-3">
+{{ form_label(form.mode_paiement, 'mode_paiement', {'label_attr': {'class': 'required'}}) }}
+{{ form_widget(form.mode_paiement, {'attr': {'class': 'form-control', 'placeholder': 'Entrez le mode_paiement de l\'offre'}}) }}
+{% if form.mode_paiement.vars.errors|length > 0 %}
+    <div class="form-error">
+        <ul class="form-error-list">
+            {% for error in form.mode_paiement.vars.errors %}
+                <li>{{ error.message }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
+<small class="form-text text-muted">Le mode_paiement doit être clair et attractif</small>
+</div>
+<div class="mb-3">
+{{ form_label(form.commentaire, 'commentaire', {'label_attr': {'class': 'required'}}) }}
+{{ form_widget(form.commentaire, {'attr': {'class': 'form-control', 'placeholder': 'Entrez le commentaire de l\'offre'}}) }}
+{% if form.commentaire.vars.errors|length > 0 %}
+    <div class="form-error">
+        <ul class="form-error-list">
+            {% for error in form.commentaire.vars.errors %}
+                <li>{{ error.message }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
+<small class="form-text text-muted">Le commentaire doit être clair et attractif</small>
+</div>
+
+            <button type="submit" class="btn btn-primary">Mettre à jour</button>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

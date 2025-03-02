@@ -1,0 +1,346 @@
+{% extends 'BackOffice/base.html.twig' %}
+
+{% block title %}Liste des Réservations{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .search-input {
+            margin-bottom: 20px;
+        }
+        .sort-header {
+            cursor: pointer;
+            user-select: none;
+        }
+        .sort-header:after {
+            content: '↕';
+            margin-left: 5px;
+            opacity: 0.4;
+        }
+        .sort-header.sort-asc:after {
+            content: '↑';
+            opacity: 1;
+        }
+        .sort-header.sort-desc:after {
+            content: '↓';
+            opacity: 1;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid">
+        <h1 class="page-title">Liste des Réservations</h1>
+
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h3>{{ reservations|length }}</h3>
+                        <p class="text-muted">Réservations</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h3>{% set total = 0 %}{% for r in reservations %}{% set total = total + r.nombrePersonne %}{% endfor %}{{ total }}</h3>
+                        <p class="text-muted">Personnes</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h3>{% set offres = [] %}{% for r in reservations %}{% if r.offre.id not in offres %}{% set offres = offres|merge([r.offre.id]) %}{% endif %}{% endfor %}{{ offres|length }}</h3>
+                        <p class="text-muted">Offres Réservées</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-12">
+                <input type="text" class="form-control search-input" placeholder="Rechercher une réservation...">
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Offre</label>
+                    <select class="form-control" id="filter-offre">
+                        <option value="">Toutes les offres</option>
+                        {% for reservation in reservations %}
+                            {% if reservation.offre.titre not in offres %}
+                                <option value="{{ reservation.offre.titre }}">{{ reservation.offre.titre }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Date de départ</label>
+                    <input type="date" class="form-control" id="filter-date">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Nombre de personnes</label>
+                    <select class="form-control" id="filter-personnes">
+                        <option value="">Tous</option>
+                        <option value="1">1 personne</option>
+                        <option value="2">2 personnes</option>
+                        <option value="3">3 personnes</option>
+                        <option value="4+">4 personnes ou plus</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th class="sort-header" data-sort="id">ID</th>
+                                <th class="sort-header" data-sort="client">CLIENT</th>
+                                <th class="sort-header" data-sort="offre">OFFRE</th>
+                                <th class="sort-header" data-sort="date">DATE DE DÉPART</th>
+                                <th class="sort-header" data-sort="personnes">PERSONNES</th>
+                                <th class="sort-header" data-sort="contact">CONTACT</th>
+                                <th>ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for reservation in reservations %}
+                                <tr>
+                                    <td>{{ reservation.id }}</td>
+                                    <td>
+                                        {{ reservation.nom }} {{ reservation.prenom }}
+                                        <br>
+                                        <small class="text-muted">{{ reservation.email }}</small>
+                                    </td>
+                                    <td>
+                                        {{ reservation.offre.titre }}
+                                        <br>
+                                        <small class="text-muted">{{ reservation.offre.prix }}€ par personne</small>
+                                    </td>
+                                    <td>{{ reservation.dateDepart ? reservation.dateDepart|date('Y-m-d') : 'Non définie' }}</td>
+                                    <td>{{ reservation.nombrePersonne }}</td>
+                                    <td>{{ reservation.telephone }}</td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="{{ path('admin_reservation_edit', {'id': reservation.id}) }}" class="btn btn-sm btn-primary">Modifier</a>
+                                            <a href="#" class="btn btn-sm btn-danger">Supprimer</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div id="columnChart"></div>
+            </div>
+            <div class="col-md-6">
+                <div id="pieChart"></div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script>
+        google.charts.load('current', {'packages':['corechart']});
+        google.charts.setOnLoadCallback(drawCharts);
+
+        function drawCharts() {
+            // Données pour les graphiques
+            var reservationData = {};
+            {% for r in reservations %}
+                var offreId = '{{ r.offre.titre }}';
+                if (!reservationData[offreId]) {
+                    reservationData[offreId] = {
+                        reservations: 0,
+                        personnes: 0
+                    };
+                }
+                reservationData[offreId].reservations++;
+                reservationData[offreId].personnes += {{ r.nombrePersonne }};
+            {% endfor %}
+
+            // Column Chart
+            var columnData = new google.visualization.DataTable();
+            columnData.addColumn('string', 'Offre');
+            columnData.addColumn('number', 'Réservations');
+            columnData.addColumn('number', 'Personnes');
+
+            for (var offre in reservationData) {
+                columnData.addRow([
+                    offre,
+                    reservationData[offre].reservations,
+                    reservationData[offre].personnes
+                ]);
+            }
+
+            var columnChart = new google.visualization.ColumnChart(document.getElementById('columnChart'));
+            columnChart.draw(columnData, {
+                title: 'Statistiques des Réservations',
+                height: 400,
+                hAxis: {title: 'Offres'},
+                vAxes: {
+                    0: {title: 'Nombre'},
+                    1: {title: 'Personnes'}
+                },
+                seriesType: 'bars'
+            });
+
+            // Pie Chart
+            var pieData = new google.visualization.DataTable();
+            pieData.addColumn('string', 'Offre');
+            pieData.addColumn('number', 'Réservations');
+
+            for (var offre in reservationData) {
+                pieData.addRow([offre, reservationData[offre].reservations]);
+            }
+
+            var pieChart = new google.visualization.PieChart(document.getElementById('pieChart'));
+            pieChart.draw(pieData, {
+                title: 'Répartition des Réservations',
+                height: 400,
+                is3D: true
+            });
+        }
+
+        // Redessiner les graphiques lors du redimensionnement
+        window.addEventListener('resize', drawCharts);
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.querySelector('.search-input');
+            const tableBody = document.querySelector('tbody');
+            let timeout = null;
+
+            searchInput.addEventListener('input', function(e) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    const query = e.target.value;
+                    
+                    fetch(`/admin/reservation/search?q=${encodeURIComponent(query)}`)
+                        .then(response => response.json())
+                        .then(reservations => {
+                            tableBody.innerHTML = '';
+                            reservations.forEach(reservation => {
+                                tableBody.innerHTML += `
+                                    <tr>
+                                        <td>${reservation.id}</td>
+                                        <td>
+                                            ${reservation.nom} ${reservation.prenom}
+                                            <br>
+                                            <small class="text-muted">${reservation.email}</small>
+                                        </td>
+                                        <td>
+                                            ${reservation.offre.titre}
+                                            <br>
+                                            <small class="text-muted">${reservation.offre.prix}€ par personne</small>
+                                        </td>
+                                        <td>${reservation.dateDepart || 'Non définie'}</td>
+                                        <td>${reservation.nombrePersonne}</td>
+                                        <td>${reservation.telephone || ''}</td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="/admin/reservation/${reservation.id}/edit" class="btn btn-sm btn-primary">Modifier</a>
+                                                <a href="#" class="btn btn-sm btn-danger">Supprimer</a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                `;
+                            });
+                        });
+                }, 300);
+            });
+
+            // Ajout du tri
+            const headers = document.querySelectorAll('.sort-header');
+            let currentSort = { column: 'id', direction: 'asc' };
+
+            function sortTable(column) {
+                const tbody = document.querySelector('tbody');
+                const rows = Array.from(tbody.querySelectorAll('tr'));
+
+                // Mise à jour des flèches
+                headers.forEach(header => {
+                    header.classList.remove('sort-asc', 'sort-desc');
+                    if (header.dataset.sort === column) {
+                        header.classList.add(currentSort.direction === 'asc' ? 'sort-asc' : 'sort-desc');
+                    }
+                });
+
+                // Tri des lignes
+                rows.sort((a, b) => {
+                    let aVal, bVal;
+                    
+                    switch(column) {
+                        case 'id':
+                            aVal = parseInt(a.cells[0].textContent);
+                            bVal = parseInt(b.cells[0].textContent);
+                            break;
+                        case 'client':
+                            aVal = a.cells[1].textContent.trim();
+                            bVal = b.cells[1].textContent.trim();
+                            break;
+                        case 'offre':
+                            aVal = a.cells[2].textContent.trim();
+                            bVal = b.cells[2].textContent.trim();
+                            break;
+                        case 'date':
+                            aVal = a.cells[3].textContent.trim();
+                            bVal = b.cells[3].textContent.trim();
+                            break;
+                        case 'personnes':
+                            aVal = parseInt(a.cells[4].textContent);
+                            bVal = parseInt(b.cells[4].textContent);
+                            break;
+                        case 'contact':
+                            aVal = a.cells[5].textContent.trim();
+                            bVal = b.cells[5].textContent.trim();
+                            break;
+                        default:
+                            return 0;
+                    }
+
+                    if (currentSort.direction === 'asc') {
+                        return aVal > bVal ? 1 : -1;
+                    } else {
+                        return aVal < bVal ? 1 : -1;
+                    }
+                });
+
+                // Réinsertion des lignes triées
+                rows.forEach(row => tbody.appendChild(row));
+            }
+
+            headers.forEach(header => {
+                header.addEventListener('click', () => {
+                    const column = header.dataset.sort;
+                    if (currentSort.column === column) {
+                        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        currentSort.column = column;
+                        currentSort.direction = 'asc';
+                    }
+                    sortTable(column);
+                });
+            });
+        });
+    </script>
+{% endblock %}
