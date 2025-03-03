@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Celebrities{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <h1>Celebrities</h1>
+    <a href="{{ path('app_celebrity_new') }}" class="btn btn-primary mb-3">Create new Celebrity</a>
+    <ul>
+        {% for celebrity in celebrities %}
+            <li>
+                <a href="{{ path('app_celebrity_show', {'id': celebrity.id}) }}">{{ celebrity.name }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

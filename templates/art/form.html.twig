@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <h1>{{ title }}</h1>
+    {{ form_start(form) }}
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>{{ form_label(form.name) }}</th>
+                <td>{{ form_widget(form.name) }}</td>
+            </tr>
+            <tr>
+                <th>{{ form_label(form.img) }}</th>
+                <td>{{ form_widget(form.img) }}</td>
+            </tr>
+            <tr>
+                <th>{{ form_label(form.description) }}</th>
+                <td>{{ form_widget(form.description) }}</td>
+            </tr>
+            <tr>
+                <th>{{ form_label(form.country) }}</th>
+                <td>{{ form_widget(form.country) }}</td>
+            </tr>
+        </tbody>
+    </table>
+    <button class="btn btn-primary">{{ title }}</button>
+    {{ form_end(form) }}
+</div>
+{% endblock %}

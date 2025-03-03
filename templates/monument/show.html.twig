@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Monument Details{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <h1>{{ monument.name }}</h1>
+    <img src="{{ monument.img }}" alt="{{ monument.name }}" class="img-fluid">
+    <p>{{ monument.description }}</p>
+    <h2>Country</h2>
+    <p>{{ monument.country.name }}</p>
+    <a href="{{ path('app_monument_edit', {'id': monument.id}) }}" class="btn btn-primary">Edit</a>
+    <form method="post" action="{{ path('app_monument_delete', {'id': monument.id}) }}" onsubmit="return confirm('Are you sure you want to delete this item?');">
+        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ monument.id) }}">
+        <button class="btn btn-danger">Delete</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Countries{% endblock %}
+
+{% block body %}
+    <h1>Countries</h1>
+
+    <a href="{{ path('app_country_new') }}" class="btn btn-primary">Create new Country</a>
+
+    <div>
+        {% for country in countries %}
+        
+            <li>
+                <img src="{{ country.img }}" alt="{{ country.name }}" width="50" height="50" />
+                <a href="{{ path('app_country_show', {'id': country.id}) }}">{{ country.name }}</a>
+            </li>
+        {% endfor %}
+    </div>
+    
+{% endblock %}

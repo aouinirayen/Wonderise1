@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Art Pieces{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <h1>Art Pieces</h1>
+    <a href="{{ path('app_art_new') }}" class="btn btn-primary mb-3">Create new Art</a>
+    <ul>
+        {% for art in arts %}
+            <li>
+                <a href="{{ path('app_art_show', {'id': art.id}) }}">{{ art.name }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

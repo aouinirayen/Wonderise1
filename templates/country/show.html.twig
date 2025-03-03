@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Country Details{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <h1>{{ country.name }}</h1>
+    <img src="{{ asset('uploads/countries/' ~ country.img) }}" alt="{{ country.name }}" class="img-fluid">
+    <p>{{ country.description }}</p>
+    <h2>Monuments</h2>
+    <ul>
+        {% for monument in country.monuments %}
+            <li>{{ monument.name }}</li>
+        {% endfor %}
+    </ul>
+    <h2>Traditional Foods</h2>
+    <ul>
+        {% for food in country.traditionalFoods %}
+            <li>{{ food.name }}</li>
+        {% endfor %}
+    </ul>
+    <h2>Arts</h2>
+    <ul>
+        {% for art in country.arts %}
+            <li>{{ art.name }}</li>
+        {% endfor %}
+    </ul>
+    <h2>Celebrities</h2>
+    <ul>
+        {% for celebrity in country.celebrities %}
+            <li>{{ celebrity.name }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

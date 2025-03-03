@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block body %}
+    <h1>{{ title }}</h1>
+
+    {{ form_start(form) }}
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>{{ form_label(form.name) }}</th>
+                <td>
+                    {{ form_widget(form.name) }}
+                    {{ form_errors(form.name) }}
+                </td>
+            </tr>
+            <tr>
+                <th>{{ form_label(form.img) }}</th>
+                <td>
+                    {{ form_widget(form.img) }}
+                    {{ form_errors(form.img) }}
+                </td>
+            </tr>
+            <tr>
+                <th>{{ form_label(form.description) }}</th>
+                <td>
+                    {{ form_widget(form.description) }}
+                    {{ form_errors(form.description) }}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <button class="btn btn-primary">{{ button_label|default('Submit') }}</button>
+    {{ form_end(form) }}
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Traditional Foods{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <h1>Traditional Foods</h1>
+    <a href="{{ path('app_traditional_food_new') }}" class="btn btn-primary mb-3">Create new Traditional Food</a>
+    <ul>
+        {% for traditional_food in traditional_foods %}
+            <li>
+                <a href="{{ path('app_traditional_food_show', {'id': traditional_food.id}) }}">{{ traditional_food.name }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
