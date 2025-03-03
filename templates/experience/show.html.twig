@@ -1,6 +1,81 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Experience Details{% endblock %}
+{% block title %}{{ experience.titre }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .sentiment-badge {
+            padding: 0.35em 0.65em;
+            border-radius: 0.25rem;
+            font-size: 0.875em;
+            margin-left: 0.5rem;
+        }
+        .sentiment-score {
+            margin-top: 0.5rem;
+            height: 4px;
+            background-color: #e9ecef;
+            border-radius: 0.25rem;
+            overflow: hidden;
+        }
+        .sentiment-score .progress-bar {
+            height: 100%;
+            border-radius: 0.25rem;
+            transition: width .6s ease;
+        }
+        .star-rating {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .stars {
+            display: inline-flex;
+            gap: 0.25rem;
+        }
+
+        .stars i {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .stars i:hover {
+            transform: scale(1.2);
+        }
+
+        .aqi-status {
+            padding: 15px;
+            border-radius: 8px;
+            color: white;
+            text-align: center;
+        }
+
+        .aqi-good {
+            background-color: #00e400;
+        }
+
+        .aqi-moderate {
+            background-color: #ffff00;
+            color: #333;
+        }
+
+        .aqi-unhealthy-for-sensitive-groups {
+            background-color: #ff7e00;
+        }
+
+        .aqi-unhealthy {
+            background-color: #ff0000;
+        }
+
+        .aqi-very-unhealthy {
+            background-color: #8f3f97;
+        }
+
+        .aqi-hazardous {
+            background-color: #7e0023;
+        }
+    </style>
+{% endblock %}
 
 {% block body %}
     <div class="container py-5">
@@ -132,6 +207,33 @@
                         </div>
                         <p class="mb-2">{{ comment.contenu }}</p>
                         
+                        {% if comment.sentiment is not null %}
+                            <div class="sentiment-badge">
+                                {% if comment.sentiment == 'positif' %}
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-smile"></i> Positif
+                                    </span>
+                                {% elseif comment.sentiment == 'négatif' %}
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-frown"></i> Négatif
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary">
+                                        <i class="fas fa-meh"></i> Neutre
+                                    </span>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+
+                        {% if comment.sentimentScore is not null %}
+                            <div class="sentiment-score">
+                                <div class="progress-bar {{ comment.sentimentScore > 0 ? 'bg-success' : 'bg-danger' }}"
+                                     role="progressbar"
+                                     style="width: {{ (comment.sentimentScore|abs * 100)|round }}%">
+                                </div>
+                            </div>
+                        {% endif %}
+
                         <div class="d-flex gap-2">
                             <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editCommentModal{{ comment.id }}">
                                 Edit
@@ -282,61 +384,4 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-{% endblock %}
-
-{% block stylesheets %}
-{{ parent() }}
-<style>
-.star-rating {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.stars {
-    display: inline-flex;
-    gap: 0.25rem;
-}
-
-.stars i {
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.stars i:hover {
-    transform: scale(1.2);
-}
-
-.aqi-status {
-    padding: 15px;
-    border-radius: 8px;
-    color: white;
-    text-align: center;
-}
-
-.aqi-good {
-    background-color: #00e400;
-}
-
-.aqi-moderate {
-    background-color: #ffff00;
-    color: #333;
-}
-
-.aqi-unhealthy-for-sensitive-groups {
-    background-color: #ff7e00;
-}
-
-.aqi-unhealthy {
-    background-color: #ff0000;
-}
-
-.aqi-very-unhealthy {
-    background-color: #8f3f97;
-}
-
-.aqi-hazardous {
-    background-color: #7e0023;
-}
-</style>
 {% endblock %}

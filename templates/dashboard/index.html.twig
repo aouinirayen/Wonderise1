@@ -2,6 +2,44 @@
 
 {% block title %}Dashboard{% endblock %}
 
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .pagination {
+        justify-content: center;
+        margin-top: 1rem;
+    }
+    .pagination .page-item.active .page-link {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+    .pagination .page-link {
+        color: #007bff;
+    }
+    .pagination .page-item.disabled .page-link {
+        color: #6c757d;
+    }
+    .sentiment-badge {
+        padding: 0.35em 0.65em;
+        border-radius: 0.25rem;
+        font-size: 0.875em;
+        margin-left: 0.5rem;
+    }
+    .sentiment-score {
+        margin-top: 0.5rem;
+        height: 4px;
+        background-color: #e9ecef;
+        border-radius: 0.25rem;
+        overflow: hidden;
+    }
+    .sentiment-score .progress-bar {
+        height: 100%;
+        border-radius: 0.25rem;
+        transition: width .6s ease;
+    }
+</style>
+{% endblock %}
+
 {% block body %}
 <main class="content-wrapper">
     <div class="content-header">
@@ -27,7 +65,7 @@
                 <div class="col-lg-3 col-6">
                     <div class="small-box bg-primary">
                         <div class="inner">
-                            <h3>{{ experiences|length }}</h3>
+                            <h3>{{ totalExperiences }}</h3>
                             <p>Total Experiences</p>
                         </div>
                         <div class="icon">
@@ -40,7 +78,7 @@
                 <div class="col-lg-3 col-6">
                     <div class="small-box bg-success">
                         <div class="inner">
-                            <h3>{{ commentaires|length }}</h3>
+                            <h3>{{ totalComments }}</h3>
                             <p>Total Comments</p>
                         </div>
                         <div class="icon">
@@ -53,7 +91,7 @@
                 <div class="col-lg-3 col-6">
                     <div class="small-box bg-warning">
                         <div class="inner">
-                            <h3>{{ experiences|length > 0 ? (commentaires|length / experiences|length)|round(1) : 0 }}</h3>
+                            <h3>{{ avgCommentsPerExperience }}</h3>
                             <p>Avg. Comments per Experience</p>
                         </div>
                         <div class="icon">
@@ -66,7 +104,7 @@
                 <div class="col-lg-3 col-6">
                     <div class="small-box bg-danger">
                         <div class="inner">
-                            <h3>{{ experiences|filter(e => e.dateCreation is defined and e.dateCreation|date('Y-m-d') == "now"|date('Y-m-d'))|length }}</h3>
+                            <h3>{{ newExperiencesToday }}</h3>
                             <p>New Experiences Today</p>
                         </div>
                         <div class="icon">
@@ -104,7 +142,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for experience in experiences|slice(0, 5) %}
+                                    {% for experience in experiences %}
                                     <tr>
                                         <td>{{ experience.titre }}</td>
                                         <td>{{ experience.description|slice(0, 50) }}...</td>
@@ -122,6 +160,11 @@
                                 </tbody>
                             </table>
                         </div>
+                        <div class="card-footer">
+                            <div class="navigation">
+                                {{ knp_pagination_render(experiences) }}
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -131,27 +174,56 @@
                         <div class="card-header">
                             <h3 class="card-title">Recent Comments</h3>
                             <div class="card-tools">
-                                <span class="badge bg-primary">{{ commentaires|length }} Total</span>
+                                <span class="badge bg-primary">{{ totalComments }} Total</span>
                             </div>
                         </div>
                         <div class="card-body">
                             <div class="direct-chat-messages" style="height: 400px;">
-                                {% for commentaire in commentaires|slice(0, 5) %}
+                                {% for commentaire in commentaires %}
                                 <div class="direct-chat-msg">
                                     <div class="direct-chat-infos clearfix">
+                                        <span class="direct-chat-name float-start">{{ commentaire.auteur }}</span>
                                         <span class="direct-chat-timestamp float-end">
                                             {{ commentaire.dateCreation ? commentaire.dateCreation|date('d M H:i') : '' }}
                                         </span>
                                     </div>
                                     <div class="direct-chat-text">
                                         {{ commentaire.contenu|slice(0, 100) }}...
+                                        {% if commentaire.sentiment is not null %}
+                                            <div class="sentiment-badge">
+                                                {% if commentaire.sentiment == 'positif' %}
+                                                    <span class="badge bg-success">
+                                                        <i class="fas fa-smile"></i> Positif
+                                                    </span>
+                                                {% elseif commentaire.sentiment == 'négatif' %}
+                                                    <span class="badge bg-danger">
+                                                        <i class="fas fa-frown"></i> Négatif
+                                                    </span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">
+                                                        <i class="fas fa-meh"></i> Neutre
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                            {% if commentaire.sentimentScore is not null %}
+                                                <div class="sentiment-score">
+                                                    <div class="progress-bar {{ commentaire.sentimentScore > 0 ? 'bg-success' : 'bg-danger' }}"
+                                                         role="progressbar"
+                                                         style="width: {{ (commentaire.sentimentScore|abs * 100)|round }}%">
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                        {% endif %}
                                     </div>
                                 </div>
                                 {% endfor %}
                             </div>
                         </div>
                         <div class="card-footer">
-                            <a href="{{ path('app_commentaire_index') }}" class="btn btn-primary btn-block">
+                            <div class="navigation">
+                                {{ knp_pagination_render(commentaires, null, {'pageParameterName': 'comments_page'}) }}
+                            </div>
+                            <a href="{{ path('app_commentaire_index') }}" class="btn btn-primary btn-block mt-3">
                                 View All Comments
                             </a>
                         </div>

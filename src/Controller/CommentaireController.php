@@ -17,6 +17,13 @@ use App\Service\SentimentAnalysisService;
 #[Route('/commentaire')]
 class CommentaireController extends AbstractController
 {
+    private $sentimentAnalyzer;
+
+    public function __construct(SentimentAnalysisService $sentimentAnalyzer)
+    {
+        $this->sentimentAnalyzer = $sentimentAnalyzer;
+    }
+
     #[Route('/', name: 'app_commentaire_index', methods: ['GET'])]
     public function index(CommentaireRepository $commentaireRepository): Response
     {
@@ -25,7 +32,7 @@ class CommentaireController extends AbstractController
         ]);
     }
 
-    #[Route('/commentaire/{id}/edit', name: 'commentaire_edit', methods: ['POST'])]
+    #[Route('/{id}/edit', name: 'commentaire_edit', methods: ['POST'])]
     public function edit(Request $request, Commentaire $commentaire, EntityManagerInterface $entityManager): Response
     {
         $submittedToken = $request->request->get('_token');
@@ -41,6 +48,11 @@ class CommentaireController extends AbstractController
             $commentaire->setContenu($contenu);
             $commentaire->setDateModification(new \DateTime());
             
+            // Re-analyze sentiment on edit
+            $sentiment = $this->sentimentAnalyzer->analyzeSentiment($contenu);
+            $commentaire->setSentiment($sentiment['sentiment']);
+            $commentaire->setSentimentScore($sentiment['score']);
+            
             $entityManager->flush();
             $this->addFlash('success', 'Comment modified successfully!');
         }
@@ -50,7 +62,7 @@ class CommentaireController extends AbstractController
         ]);
     }
 
-    #[Route('/commentaire/{id}/delete', name: 'commentaire_delete', methods: ['POST'])]
+    #[Route('/{id}/delete', name: 'commentaire_delete', methods: ['POST'])]
     public function delete(Request $request, Commentaire $commentaire, EntityManagerInterface $entityManager): Response
     {
         $submittedToken = $request->request->get('_token');
@@ -72,8 +84,7 @@ class CommentaireController extends AbstractController
     public function addComment(
         Request $request, 
         Experience $experience, 
-        EntityManagerInterface $entityManager,
-        SentimentAnalysisService $sentimentAnalyzer
+        EntityManagerInterface $entityManager
     ): Response {
         $commentaire = new Commentaire();
         $commentaire->setExperience($experience);
@@ -82,14 +93,18 @@ class CommentaireController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Analyser le sentiment du commentaire
-            $sentiment = $sentimentAnalyzer->analyzeSentiment($commentaire->getContenu());
+            // Set creation date
+            $commentaire->setDateCreation(new \DateTime());
+            $commentaire->setDateModification(new \DateTime());
+
+            // Analyze sentiment
+            $sentiment = $this->sentimentAnalyzer->analyzeSentiment($commentaire->getContenu());
             
-            // Sauvegarder le sentiment et le score
+            // Set sentiment data
             $commentaire->setSentiment($sentiment['sentiment']);
             $commentaire->setSentimentScore($sentiment['score']);
             
-            // Ajouter un message d'avertissement si nécessaire
+            // Add warning for negative comments
             if ($sentiment['sentiment'] === 'négatif') {
                 $this->addFlash('warning', 'Your comment appears to be negative. Please keep it constructive.');
             }
@@ -99,6 +114,11 @@ class CommentaireController extends AbstractController
 
             $this->addFlash('success', 'Your comment has been added successfully!');
             return $this->redirectToRoute('app_experience_show', ['id' => $experience->getId()]);
+        }
+
+        // If form is not valid, add error message
+        foreach ($form->getErrors(true) as $error) {
+            $this->addFlash('error', $error->getMessage());
         }
 
         return $this->redirectToRoute('app_experience_show', ['id' => $experience->getId()]);

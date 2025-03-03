@@ -7,6 +7,7 @@ use App\Entity\Commentaire;
 use App\Form\ExperienceType;
 use App\Form\CommentaireType;
 use App\Repository\ExperienceRepository;
+use App\Repository\CommentaireRepository;
 use App\Service\AirQualityService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -85,15 +86,22 @@ class ExperienceController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_experience_show', methods: ['GET'])]
-    public function show(Experience $experience): Response
+    public function show(Experience $experience, CommentaireRepository $commentaireRepository): Response
     {
         $commentForm = $this->createForm(CommentaireType::class, new Commentaire(), [
             'action' => $this->generateUrl('commentaire_add', ['id' => $experience->getId()])
         ]);
 
+        // Get comments for this experience
+        $commentaires = $commentaireRepository->findBy(
+            ['experience' => $experience],
+            ['dateCreation' => 'DESC']
+        );
+
         return $this->render('experience/show.html.twig', [
             'experience' => $experience,
-            'commentForm' => $commentForm->createView()
+            'commentForm' => $commentForm->createView(),
+            'commentaires' => $commentaires
         ]);
     }
 
