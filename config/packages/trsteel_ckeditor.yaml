@@ -1,0 +1,6 @@
+trsteel_ckeditor:
+    toolbar: 
+        - ["Bold", "Italic", "Underline", "|", "Link", "Image", "|", "BulletedList", "NumberedList", "|", "TranslateText"]
+    external_plugins:
+        translate:
+            path: "/js/translate-plugin.js"
