@@ -21,7 +21,7 @@ class StatistiquesController extends AbstractController
     #[Route('/statistiques', name: 'admin_statistiques')]
     public function index(): Response
     {
-        // Récupérer les données des réclamations les plus fréquentes
+      
         $reclamationsFrequentes = $this->statistiquesService->getReclamationsFrequentes(10);
         
         return $this->render('back_office/statistiques/index.html.twig', [
