@@ -12,7 +12,7 @@ class EmailService
     private MailerInterface $mailer;
     private Environment $twig;
     private ?LoggerInterface $logger;
-    private bool $sendEmails = true; // Activé
+    private bool $sendEmails = true; 
 
     public function __construct(MailerInterface $mailer, Environment $twig, LoggerInterface $logger = null)
     {
@@ -39,13 +39,13 @@ class EmailService
         try {
             $this->mailer->send($email);
         } catch (TransportExceptionInterface $e) {
-            // If there's an error with the mailer, log it and disable future email sending
+           
             if ($this->logger) {
                 $this->logger->error('Email sending failed: ' . $e->getMessage());
             }
             $this->sendEmails = false;
             
-            // Log the email that was attempted to be sent
+            
             $this->logEmail($adminEmail, 'Nouvelle Réclamation Reçue', $data);
         }
     }
