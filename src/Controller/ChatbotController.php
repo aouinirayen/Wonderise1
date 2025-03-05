@@ -1,5 +1,5 @@
 <?php
-
+// src/Controller/ChatbotController.php
 namespace App\Controller;
 
 use App\Service\BotManFactoryService;
@@ -7,6 +7,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use BotMan\Drivers\Web\WebDriver;
 
 class ChatbotController extends AbstractController
 {
@@ -18,43 +19,43 @@ class ChatbotController extends AbstractController
     }
 
     #[Route('/chatbot/api', name: 'app_chatbot', methods: ['POST'])]
-    public function handle(Request $request): JsonResponse
+    public function chatbotApi(Request $request): JsonResponse
     {
         $botman = $this->botManFactory->createBotMan();
+
         $data = json_decode($request->getContent(), true);
-        $userMessage = $data['message'] ?? '';
 
-        // 🔥 Debug : Vérifier si la requête arrive bien
-        file_put_contents('chatbot_debug.log', "Message reçu : " . $userMessage . PHP_EOL, FILE_APPEND);
+        if (!$data || !isset($data['message'])) {
+            return new JsonResponse(['message' => 'Erreur : message invalide.'], 400);
+        }
 
-        // Message par défaut
-        $responseMessage = "Je n'ai pas compris votre question.";
+        $message = $data['message'];
+        $response = '';
 
-        // Définition des réponses
-        $botman->hears('bonjour', function ($bot) use (&$responseMessage) {
-            $responseMessage = "Salut ! Comment puis-je vous aider ?";
+        // Écouter les commandes spécifiques du bot
+        $botman->hears('bonjour', function ($bot) use (&$response) {
+            $response = "Bonjour ! Comment puis-je vous aider ?";
+            $bot->reply($response);
         });
 
-        $botman->hears('réclamation', function ($bot) use (&$responseMessage) {
-            $responseMessage = "Vous pouvez déposer une réclamation dans la section 'Nouvelle réclamation'.";
+        $botman->hears('aide', function ($bot) use (&$response) {
+            $response = "Je suis un chatbot ! Posez-moi une question.";
+            $bot->reply($response);
         });
 
-        $botman->fallback(function ($bot) use (&$responseMessage) {
-            $responseMessage = "Désolé, je ne comprends pas encore cette question.";
+        // Si aucun message spécifique n'est capté
+        $botman->hears('.*', function ($bot, $query) use (&$response) {
+            $response = "Vous avez dit : " . $query;
+            $bot->reply($response);
         });
 
-        // Écoute du message utilisateur
+        // Exécuter le bot
         $botman->listen();
 
-        // 🔥 Debug : Vérifier la réponse générée
-        file_put_contents('chatbot_debug.log', "Réponse envoyée : " . $responseMessage . PHP_EOL, FILE_APPEND);
+        if (empty($response)) {
+            $response = "Désolé, je ne comprends pas.";
+        }
 
-        return new JsonResponse(['message' => $responseMessage]);
-    }
-
-    #[Route('/chatbot', name: 'app_reclamation_chatbot', methods: ['GET'])]
-    public function chatbot()
-    {
-        return $this->render('front_office/reclamation/chatbot.html.twig');
+        return new JsonResponse(['message' => $response]);
     }
 }

@@ -1,41 +1,142 @@
 {% extends 'base.html.twig' %}
 
-{% block title %} Chatbot d'Aide {% endblock %}
+{% block stylesheets %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .chat-container {
+            max-width: 600px;
+            margin: auto;
+            margin-top: 50px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #chatbox {
+            height: 400px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            background-color: #fff;
+        }
+
+        .chat-message {
+            max-width: 75%;
+            padding: 12px;
+            margin: 5px;
+            border-radius: 20px;
+            display: inline-block;
+            word-wrap: break-word;
+            font-size: 14px;
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background-color: #007bff;
+            color: white;
+            text-align: right;
+        }
+
+        .bot-message {
+            align-self: flex-start;
+            background-color: #e9ecef;
+            color: black;
+        }
+
+        .chat-spinner {
+            text-align: center;
+            display: none;
+        }
+
+        .input-group input {
+            border-radius: 20px;
+        }
+
+        .btn-send {
+            border-radius: 20px;
+        }
+    </style>
+{% endblock %}
 
 {% block body %}
-    <h2>Besoin d'aide ? Posez votre question au chatbot 🤖</h2>
+<div class="chat-container">
+    <h4 class="text-center text-primary">Chatbot Intelligent 🤖</h4>
+    
+    <div id="chatbox" class="mb-3">
+        <!-- Messages du chat apparaîtront ici -->
+    </div>
 
-    <div id="chatbox" style="width: 100%; max-width: 400px; height: 300px; border: 1px solid #ccc; overflow-y: scroll; padding: 10px;"></div>
-    <input type="text" id="user-input" placeholder="Écrivez un message..." style="width: 80%; padding: 5px;">
-    <button onclick="sendMessage()">Envoyer</button>
+    <div class="chat-spinner">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Chargement...</span>
+        </div>
+    </div>
 
-    <script>
-        function sendMessage() {
-            let input = document.getElementById("user-input").value;
-            let chatbox = document.getElementById("chatbox");
+    <div class="input-group mt-3">
+        <input type="text" id="user-input" class="form-control" placeholder="Posez une question..." autofocus>
+        <button onclick="sendMessage()" class="btn btn-primary btn-send">Envoyer</button>
+    </div>
+</div>
 
-            if (input.trim() === "") return;
+<script>
+    async function sendMessage() {
+        let inputField = document.getElementById("user-input");
+        let chatbox = document.getElementById("chatbox");
+        let spinner = document.querySelector(".chat-spinner");
+        let userMessage = inputField.value.trim();
 
-            chatbox.innerHTML += "<p><strong>Vous:</strong> " + input + "</p>";
+        if (userMessage === "") return;
 
-            console.log("Envoi du message : " + input); // 🔥 Debug
+        // Ajouter le message utilisateur dans le chat
+        let userDiv = document.createElement("div");
+        userDiv.className = "chat-message user-message";
+        userDiv.innerText = userMessage;
+        chatbox.appendChild(userDiv);
+        chatbox.scrollTop = chatbox.scrollHeight;
 
-            fetch("/chatbot/api", {
+        // Afficher le spinner
+        spinner.style.display = "block";
+
+        // Réinitialiser le champ de saisie
+        inputField.value = "";
+
+        try {
+            let response = await fetch("https://127.0.0.1:8000/reclamation/chatbot/api", {
                 method: "POST",
-                body: JSON.stringify({message: input}),
-                headers: {"Content-Type": "application/json"}
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log("Réponse du bot :", data.message); // 🔥 Debug
-                chatbox.innerHTML += "<p><strong>Bot:</strong> " + data.message + "</p>";
-            })
-            .catch(error => {
-                console.error("Erreur :", error);
-                chatbox.innerHTML += "<p><strong>Bot:</strong> Une erreur est survenue.</p>";
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: userMessage })
             });
 
-            document.getElementById("user-input").value = "";
+            if (!response.ok) {
+                throw new Error("Erreur serveur " + response.status);
+            }
+
+            let data = await response.json();
+
+            // Afficher la réponse du bot
+            let botDiv = document.createElement("div");
+            botDiv.className = "chat-message bot-message";
+            botDiv.innerText = data.message;
+            chatbox.appendChild(botDiv);
+        } catch (error) {
+            console.error("Erreur :", error);
+            let errorDiv = document.createElement("div");
+            errorDiv.className = "chat-message bot-message text-danger";
+            errorDiv.innerText = "❌ Une erreur est survenue.";
+            chatbox.appendChild(errorDiv);
+        } finally {
+            // Cacher le spinner
+            spinner.style.display = "none";
+            chatbox.scrollTop = chatbox.scrollHeight;
         }
-    </script>
+    }
+</script>
 {% endblock %}

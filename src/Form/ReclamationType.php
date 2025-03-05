@@ -16,9 +16,10 @@ class ReclamationType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('Objet')
+            ->add('Objet', TextareaType::class, [
+                'attr' => ['rows' => 3],] )
             ->add('Description', TextareaType::class, [
-                'attr' => ['rows' => 5], // Optionnel : définit la hauteur du champ
+                'attr' => ['rows' => 5], 
             ])
             
             
