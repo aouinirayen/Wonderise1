@@ -1,5 +1,5 @@
 <?php
-// src/Controller/ChatbotController.php
+
 namespace App\Controller;
 
 use App\Service\BotManFactoryService;
@@ -43,13 +43,12 @@ class ChatbotController extends AbstractController
             $bot->reply($response);
         });
 
-        // Si aucun message spécifique n'est capté
+       
         $botman->hears('.*', function ($bot, $query) use (&$response) {
             $response = "Vous avez dit : " . $query;
             $bot->reply($response);
         });
 
-        // Exécuter le bot
         $botman->listen();
 
         if (empty($response)) {
